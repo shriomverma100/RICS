@@ -1,0 +1,967 @@
+<title>Narmada Hybrid</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: dark top bar with section pills · stage card (visual) on the left · floating glass guide panel on the right that drives the story with Enter. Single light look by design. */
+:root{
+  color-scheme:light;
+  --bg:#E7E5E0; --card:#F3F2EE; --paper:#FFFFFF; --ink:#1C1C1A; --muted:#6C6B65; --line:#D8D6CF; --line2:#C9C6BD;
+  --bar:#2A2927; --pill:#3B3A36; --pill-ink:#ECEAE3;
+  --lime:#DCD45C; --lime-soft:#EFEBB6; --olive:#A39A26;
+  --solar:#D49A12; --wind:#3E9378; --hydro:#3767C9; --bess:#7E5DC4; --grid:#77756D; --carbon:#5F9334; --risk:#C2553D; --accent:#A39A26; --muted-c:#9C9A92;
+  --sans:"Geist","Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"Geist Mono",ui-monospace,"Cascadia Mono",Consolas,monospace;
+}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.5;overflow:hidden;-webkit-font-smoothing:antialiased}
+*{box-sizing:border-box}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--olive);outline-offset:2px}
+.app{height:100%;display:grid;grid-template-rows:auto minmax(0,1fr)}
+/* top bar */
+.top{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:stretch;padding-right:max(0px,env(safe-area-inset-right,0px))}
+.brand{display:flex;align-items:center;gap:10px;padding:16px 46px 16px max(28px,env(safe-area-inset-left,0px))}
+.brand i{width:26px;height:26px;border-radius:7px;background:var(--bar);display:grid;place-items:center}
+.brand i::after{content:"";width:12px;height:12px;border-radius:3px;background:var(--lime)}
+.brand b{font-weight:400;font-size:23px;letter-spacing:-.6px}
+.bar{background:var(--bar);display:flex;align-items:center;gap:8px;padding:14px max(20px,env(safe-area-inset-right,0px)) 14px 64px;clip-path:polygon(0 0,100% 0,100% 100%,52px 100%);min-width:0}
+.pills{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;min-width:0}
+.pills::-webkit-scrollbar{display:none}
+.pill{display:inline-flex;align-items:center;gap:8px;border:0;border-radius:999px;background:var(--pill);color:var(--pill-ink);padding:10px 16px;font-size:14px;font-weight:500;white-space:nowrap}
+.pill .n{font-family:var(--mono);font-size:11px;opacity:.7}
+.pill[aria-current="true"]{background:var(--paper);color:var(--ink)}
+.pill:hover:not([aria-current="true"]){background:#4A4944}
+.barright{margin-left:auto;display:flex;align-items:center;gap:12px;padding-left:12px}
+.keyhint{color:var(--pill-ink);font-size:13px;white-space:nowrap}
+.lime-btn{background:var(--lime);color:var(--ink);border:0;border-radius:999px;padding:10px 18px;font-weight:500;white-space:nowrap}
+/* main */
+.main{display:grid;grid-template-columns:minmax(0,1fr) 410px;gap:22px;padding:22px max(22px,env(safe-area-inset-right,0px)) calc(22px + env(safe-area-inset-bottom,0px)) max(22px,env(safe-area-inset-left,0px));min-height:0}
+.main.noguide{grid-template-columns:minmax(0,1fr) 0}
+.stage{background:var(--card);border:1px solid var(--line);border-radius:28px;padding:26px 28px 22px;display:flex;flex-direction:column;min-height:0;min-width:0}
+.chiprow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.chip-lime{display:inline-flex;align-items:center;gap:7px;background:var(--lime);border-radius:999px;padding:5px 14px;font-size:13.5px;font-weight:500}
+.chip-lime::before{content:"";width:8px;height:8px;border-radius:50%;border:1.6px solid var(--ink)}
+.chip-o{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line2);background:var(--paper);border-radius:999px;padding:4px 12px;font-size:13px;color:var(--ink)}
+.stage h1,.stage h2{font-weight:300;letter-spacing:-1.6px;line-height:1.02;margin:14px 0 8px;text-wrap:balance}
+.stage h1{font-size:clamp(40px,5vw,76px);letter-spacing:-2.6px}
+.stage h2{font-size:clamp(28px,3.1vw,48px)}
+.sub{color:var(--muted);font-size:16px;max-width:70ch;margin:0 0 14px}
+.builton{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:0 0 12px}
+.builton small{font-size:12px;letter-spacing:.08em;color:var(--muted);margin-right:4px}
+.visual{position:relative;flex:1;min-height:0;display:flex;flex-direction:column;border-radius:20px;background:var(--paper);border:1px solid var(--line);overflow:hidden}
+.visual.bare{background:transparent;border:0}
+.vhead{display:flex;align-items:center;gap:10px;padding:10px 14px;font-size:13px;color:var(--muted);flex-wrap:wrap}
+.vhead b{color:var(--ink);font-weight:500}
+.vhead .sp{margin-left:auto;display:flex;gap:6px;flex-wrap:wrap}
+.tog{border:1px solid var(--line2);background:var(--paper);border-radius:999px;padding:4px 12px;font-size:12.5px}
+.tog[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.vbody{position:relative;flex:1;min-height:0;overflow:auto}
+.vbody.center{display:flex;align-items:center;justify-content:center;padding:8px 14px}
+.vbody > svg{display:block;width:100%;height:100%;max-height:100%}
+.vnote{font-size:12px;color:var(--muted);padding:8px 14px;border-top:1px solid var(--line)}
+/* guide panel */
+.guide{background:rgba(243,242,238,.94);backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:22px;box-shadow:0 18px 40px rgba(40,38,30,.10);display:flex;flex-direction:column;min-height:0;overflow:hidden}
+.ghead{display:flex;align-items:center;gap:8px;padding:14px 18px;border-bottom:1px solid var(--line)}
+.badge{background:var(--bar);color:#fff;border-radius:7px;padding:2px 8px;font-size:12px;font-weight:600}
+.ghead .sec{font-size:13px;color:var(--muted)}
+.ghead .cnt{margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--muted)}
+.ghead .x{border:0;background:none;color:var(--muted);font-size:16px;padding:0 4px}
+.gbody{padding:16px 18px;overflow-y:auto;flex:1;min-height:0;display:flex;flex-direction:column;gap:12px}
+.gbody h3{font-weight:400;font-size:25px;letter-spacing:-.6px;line-height:1.15;margin:0;text-wrap:balance}
+.box{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:12px 14px;font-size:14px}
+.box.now{border-color:var(--olive);box-shadow:0 0 0 3px var(--lime-soft)}
+.lab{font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:500}
+.plist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+.plist button{width:100%;display:grid;grid-template-columns:28px 1fr;gap:6px;align-items:baseline;text-align:left;border:0;background:none;border-radius:10px;padding:6px 8px;font-size:14px;color:var(--muted)}
+.plist button .n{font-family:var(--mono);font-size:11.5px}
+.plist button.past{color:var(--ink)}
+.plist button.past .n::before{content:"✓ ";color:var(--olive)}
+.plist button.now{background:var(--paper);color:var(--ink);font-weight:500;box-shadow:inset 0 0 0 1px var(--line)}
+.plist button.now .n{color:var(--olive)}
+.why{font-size:13px;color:var(--muted)}
+.why b{color:var(--ink);font-weight:600}
+.gfoot{border-top:1px solid var(--line);padding:12px 18px 14px;display:flex;flex-direction:column;gap:12px}
+.dashes{display:flex;gap:4px}
+.dashes i{flex:1;height:5px;border-radius:3px;background:var(--line)}
+.dashes i.done{background:var(--olive)}
+.dashes i.on{background:var(--ink)}
+.gbtns{display:flex;align-items:center;gap:8px}
+.gbtns .restart{border:0;background:none;color:var(--muted);text-decoration:underline;font-size:13px;padding:0}
+.gbtns .back{margin-left:auto;border:1px solid var(--line2);background:var(--paper);border-radius:999px;padding:9px 18px}
+.gbtns .next{border:0;background:var(--lime);border-radius:999px;padding:10px 20px;font-weight:500}
+kbd{font-family:var(--mono);font-size:11px;border:1px solid var(--line2);border-bottom-width:2px;border-radius:5px;padding:0 5px;background:var(--paper);color:var(--ink)}
+/* 3d */
+#three{position:absolute;inset:0;border-radius:20px;overflow:hidden}
+#three canvas{display:block;width:100%!important;height:100%!important;cursor:grab}
+.lbl{position:absolute;transform:translate(-50%,-100%);font-size:12px;font-weight:500;padding:4px 10px 4px 8px;border-radius:999px;background:rgba(255,255,255,.95);color:var(--ink);border:1px solid var(--line2);white-space:nowrap;cursor:pointer;display:flex;align-items:center;gap:6px;box-shadow:0 4px 10px rgba(0,0,0,.08)}
+.lbl::after{content:"";position:absolute;left:50%;top:100%;width:1px;height:12px;background:rgba(255,255,255,.9)}
+.lbl i{width:9px;height:9px;border-radius:50%}
+.lbl.hot{background:var(--lime);border-color:var(--olive);z-index:2}
+.lbl.dim{opacity:.6}
+.readout{position:absolute;right:12px;top:12px;background:rgba(255,255,255,.95);border:1px solid var(--line);border-radius:16px;padding:10px 12px;font-size:12.5px;min-width:220px;z-index:3;box-shadow:0 8px 20px rgba(0,0,0,.08)}
+.readout h5{margin:0 0 6px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:500}
+.readout .row{display:grid;grid-template-columns:12px 1fr auto;gap:8px;align-items:center;font-family:var(--mono);font-size:12px;padding:1px 0}
+.readout .row i{width:9px;height:9px;border-radius:50%}
+.readout .tot{border-top:1px solid var(--line);margin-top:4px;padding-top:5px;font-weight:600}
+.readout p{margin:6px 0 0;color:var(--muted);font-size:12px;max-width:240px;font-family:var(--sans)}
+.hint3d{position:absolute;left:12px;bottom:12px;font-size:12px;color:var(--ink);background:rgba(255,255,255,.92);border:1px solid var(--line);border-radius:999px;padding:4px 12px}
+.webglfail{padding:24px;color:var(--muted)}
+/* diagrams */
+.dg .node{cursor:grab}
+.dg .node .card{fill:var(--paper);stroke:var(--line2);stroke-width:1}
+.dg .node .halo{fill:none;stroke:var(--lime);stroke-width:0;opacity:.8}
+.dg .node .t{font:500 13px var(--sans);fill:var(--ink)}
+.dg .node .s{font:400 10.5px var(--mono);fill:var(--muted)}
+.dg .node.hot .card{stroke:var(--olive);stroke-width:1.8}
+.dg .node.hot .halo{stroke-width:6}
+.dg.focus .node:not(.hot){opacity:.38}
+.dg .edge{fill:none;stroke:var(--muted-c);stroke-width:1.5;stroke-dasharray:2 5;stroke-linecap:round}
+.dg .edge.flow{animation:flow 1.2s linear infinite}
+.dg.focus .edge:not(.hot){opacity:.2}
+.dg .edge.hot{stroke-width:2.4}
+.dg .elab{font:400 10.5px var(--mono);fill:var(--muted)}
+.dg .node,.dg .edge{transition:opacity .25s}
+@keyframes flow{to{stroke-dashoffset:-14}}
+/* charts, tables, cards */
+.ax{font:400 11px var(--mono);fill:var(--muted)}
+.axl{stroke:var(--line);stroke-width:1}
+.ttl{font:500 12.5px var(--sans);fill:var(--ink)}
+.tbl{width:100%;border-collapse:collapse;font-size:13.5px}
+.tbl th{text-align:left;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:500;padding:10px 14px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--paper)}
+.tbl td{padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+.tbl td:first-child{font-weight:500}
+.tbl td.num{font-family:var(--mono);text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.tbl tr{transition:opacity .25s,background .25s}
+.tbl tr.hot td{background:var(--lime-soft)}
+.tbl tr.dim{opacity:.45}
+.pass{color:var(--carbon);font-weight:600}.fail{color:var(--risk);font-weight:600}
+.kpis{display:flex;gap:10px;flex-wrap:wrap;margin-top:4px}
+.kpi{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:10px 14px;min-width:150px}
+.kpi small{display:block;font-size:12px;color:var(--muted)}
+.kpi b{font-weight:400;font-size:26px;letter-spacing:-.6px;font-variant-numeric:tabular-nums}
+.rank{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;padding:16px;align-content:start}
+.rcard{background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:14px;display:flex;flex-direction:column;gap:8px;transition:opacity .25s,box-shadow .25s,border-color .25s;min-width:0}
+.rcard.hot{border-color:var(--olive);box-shadow:0 0 0 4px var(--lime-soft)}
+.rcard.dim{opacity:.45}
+.rcard .top2{display:flex;justify-content:space-between;align-items:baseline;font-family:var(--mono);font-size:12px;color:var(--muted)}
+.rcard .score{font-family:var(--sans);font-size:24px;font-weight:300;color:var(--ink);letter-spacing:-.5px}
+.rcard h4{margin:0;font-size:15px;font-weight:500;line-height:1.25}
+.rcard .meter{height:6px;border-radius:3px;background:var(--line);overflow:hidden}
+.rcard .meter i{display:block;height:100%;background:var(--olive)}
+.rcard p{margin:0;font-size:12.5px;color:var(--muted)}
+.rcard p b{color:var(--ink);font-weight:500}
+@media (max-width:1100px){.rank{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:1500px){.keyhint{display:none}}
+@media (max-width:1000px){
+  body{overflow:auto}
+  .app{height:auto}
+  .main{grid-template-columns:1fr}
+  .main.noguide{grid-template-columns:1fr}
+  .visual{min-height:440px}
+  .guide{max-height:none}
+  .brand{padding-right:24px}
+  .keyhint{display:none}
+}
+@media (max-width:560px){.rank{grid-template-columns:1fr}.stage{padding:18px 16px}.brand b{font-size:19px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="app">
+  <header class="top">
+    <div class="brand"><i aria-hidden="true"></i><b>narmada hybrid</b></div>
+    <div class="bar">
+      <nav class="pills" id="pills" aria-label="Sections"></nav>
+      <div class="barright"><span class="keyhint"><kbd>Enter</kbd> next · <kbd>←</kbd> back</span><button class="lime-btn" id="guideToggle" type="button">Guide</button></div>
+    </div>
+  </header>
+  <div class="main" id="main">
+    <section class="stage" id="stage" aria-live="polite"></section>
+    <aside class="guide" id="guide" aria-label="Presenter guide">
+      <div class="ghead"><span class="badge">Guide</span><span class="sec" id="gsec"></span><span class="cnt" id="gcnt"></span><button class="x" id="gclose" type="button" aria-label="Hide guide">×</button></div>
+      <div class="gbody" id="gbody"></div>
+      <div class="gfoot"><div class="dashes" id="dashes"></div>
+        <div class="gbtns"><button class="restart" id="restart" type="button">Restart</button><button class="back" id="back" type="button">Back</button><button class="next" id="next" type="button">Next ↵</button></div></div>
+    </aside>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+"use strict";
+const DATA = {"model": {"net": [93.13, 432.47, 666.2, 715.83, 712.75, 709.7, 706.65, 703.63, 700.61, 697.62, 694.63, 691.67, 688.71, 685.78, 682.85, 679.94, 677.05, 674.17, 671.31, 668.45, 665.62, 662.8, 659.99, 657.19, 654.41, 651.65], "g_fpv": [93.6, 436.8, 620.88, 617.78, 614.69, 611.61, 608.56, 605.51, 602.48, 599.47, 596.48, 593.49, 590.53, 587.57, 584.63, 581.71, 578.8, 575.91, 573.03, 570.16, 567.31, 564.48, 561.65, 558.85, 556.05, 553.27], "g_wind": [0, 0, 52.98, 105.96, 105.96, 105.96, 105.96, 105.96, 105.96, 105.96, 105.96, 105.96, 105.96, 105.96, 105.96, 105.96, 105.96, 105.96, 105.96, 105.96, 105.96, 105.96, 105.96, 105.96, 105.96, 105.96], "b_out": [0, 14.36, 28.71, 28.71, 28.71, 28.71, 28.71, 28.71, 28.71, 28.71, 28.71, 28.71, 28.71, 28.71, 28.71, 28.71, 28.71, 28.71, 28.71, 28.71, 28.71, 28.71, 28.71, 28.71, 28.71, 28.71], "rv_ems": [11.5, 15.33, 15.33, 15.33, 15.33, 15.33, 15.33, 15.33, 15.33, 15.33, 15.33, 15.33, 15.33, 15.33, 15.33, 15.33, 15.33, 15.33, 15.33, 15.33, 15.33, 15.33, 15.33, 15.33, 15.33, 15.33], "rv_ppa": [33.53, 155.69, 239.83, 257.7, 256.59, 255.49, 254.4, 253.31, 252.22, 251.14, 250.07, 249.0, 247.94, 246.88, 245.83, 244.78, 243.74, 242.7, 241.67, 240.64, 239.62, 238.61, 237.6, 236.59, 235.59, 234.59], "rv_ci": [11.64, 54.06, 84.11, 91.28, 91.79, 92.31, 92.84, 93.36, 93.89, 94.43, 94.96, 95.5, 96.05, 96.59, 97.14, 97.7, 98.25, 98.81, 99.38, 99.95, 100.52, 101.09, 101.67, 102.25, 102.84, 103.43], "rv_anc": [0, 2.5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5], "rv_co2": [1.98, 9.49, 15.05, 16.66, 17.09, 17.52, 17.97, 18.43, 18.9, 19.39, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], "rv_tot": [58.65, 237.07, 359.32, 385.97, 385.8, 385.66, 385.53, 385.43, 385.35, 385.29, 365.36, 364.83, 364.31, 363.8, 363.3, 362.81, 362.32, 361.85, 361.38, 360.92, 360.47, 360.03, 359.6, 359.17, 358.76, 358.35], "om_tot": [16.52, 47.98, 70.2, 76.7, 78.52, 80.42, 82.39, 84.45, 86.59, 88.82, 90.25, 92.66, 95.17, 97.78, 100.5, 103.33, 106.28, 109.35, 112.55, 115.88, 119.35, 122.96, 126.72, 130.63, 134.71, 138.95], "ebitda": [42.13, 189.08, 289.13, 309.26, 307.28, 305.24, 303.14, 300.98, 298.76, 296.46, 275.11, 272.17, 269.15, 266.02, 262.8, 259.47, 256.04, 252.49, 248.82, 245.03, 241.12, 237.06, 232.87, 228.54, 224.05, 219.4], "pat": [10.76, 50.77, 65.48, 76.88, 82.84, 92.04, 104.47, 109.57, 114.61, 119.57, 105.48, 107.31, 111.54, 81.39, 65.8, 68.19, 70.6, 73.01, 75.39, 77.74, 80.02, 82.03, 78.74, 78.37, 74.9, 71.33], "ecf": [-303.74, -269.31, -32.29, 80.16, 91.08, 101.91, 110.71, 115.81, 120.84, 125.81, 89.16, 116.1, 90.33, 93.18, 77.59, 79.98, 82.39, 84.79, 87.18, 89.52, 135.38, 178.46, 175.17, 171.79, 168.32, 164.75], "ecf_cum": [-303.74, -573.05, -605.33, -525.17, -434.1, -332.18, -221.48, -105.67, 15.17, 140.98, 230.14, 346.24, 436.57, 529.75, 607.34, 687.32, 769.7, 854.5, 941.67, 1031.19, 1166.57, 1345.03, 1520.19, 1691.98, 1860.3, 2025.06], "fcf_cum": [-989.33, -1952.42, -1858.29, -1552.32, -1245.02, -939.76, -636.6, -335.6, -73.92, 154.89, 344.36, 552.88, 729.29, 932.46, 1132.52, 1329.53, 1523.52, 1714.49, 1902.4, 2087.22, 2268.89, 2447.34, 2622.51, 2794.3, 2962.62, 3127.37], "d_close": [716.96, 1508.08, 1634.03, 1543.25, 1452.47, 1361.69, 1270.91, 1180.13, 1089.36, 998.58, 907.8, 817.02, 726.24, 635.46, 544.68, 453.9, 363.12, 272.34, 181.56, 90.78, 0, 0, 0, 0, 0, 0], "dscr": [null, null, null, 1.33, 1.39, 1.45, 1.55, 1.59, 1.65, 1.7, 1.51, 1.7, 1.57, 1.62, 1.54, 1.58, 1.64, 1.7, 1.77, 1.84, 1.93, null, null, null, null, null], "ds": [31.37, 97.35, 137.47, 229.79, 221.84, 210.61, 196.08, 188.82, 181.56, 174.3, 167.03, 159.77, 152.51, 145.25, 137.99, 130.72, 123.46, 116.2, 108.94, 101.67, 94.41, 0, 0, 0, 0, 0], "tax": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 31.29, 50.92, 52.47, 53.88, 55.19, 56.4, 57.53, 58.59, 58.66, 57.76, 56.8, 55.78, 54.7], "c_net": [1024.23, 1130.18, 179.93, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], "cc_full": [66123.72, 307054.41, 473002.84, 508237.79, 506055.65, 503884.43, 501724.06, 499574.49, 497435.67, 495307.54, 493190.05, 491083.15, 488986.79, 486900.91, 484825.45, 482760.38, 480705.63, 478661.15, 476626.89, 474602.81, 472588.85, 470584.95, 468591.08, 466607.18, 464633.19, 462669.08], "cc_sold": [33061.86, 153527.2, 236501.42, 254118.9, 253027.83, 251942.21, 250862.03, 249787.24, 248717.83, 247653.77, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, "capex": [["Floating solar PV (Indira Sagar reservoir)", 390, "MWp", 4, 1560, 1380.6, 179.4], ["Onshore wind (reservoir-bank plateau)", 50.4, "MW", 6.8, 342.7, 272.2, 70.6], ["Battery energy storage (LFP)", 100, "MWh", 1, 100, 87.0, 13.0], ["Pooling substation & evacuation", 1, "lump sum", 150, 150, 115, 35], ["Smart layer: AI-EMS, SCADA, sensors, digital twin", 1, "lump sum", 30, 30, 24, 6], ["Pre-development, surveys & clearances", 1, "lump sum", 25, 25, 0, 25], ["Subtotal: equipment, works & services", null, null, null, 2207.7, 1878.8, 329.0], ["Contingency", null, null, 0.05, 110.4, 93.9, 16.4], ["Contingency", null, null, null, 110.4, 93.9, 16.4], ["Financing cost: lender upfront fee", null, null, null, 16.2, null, 16.2], ["GROSS CAPITAL COST", null, null, null, 2334.3, 1972.7, 361.6], ["GROSS CAPITAL COST", null, null, null, 2334.3, 1972.7, 361.6], ["Less: Viability Gap Funding for BESS (government grant, if received)", null, null, null, 0, null, null], ["NET PROJECT COST (funded by debt + equity)", null, null, null, 2334.3, null, null]], "builds": {"A1. Floating solar PV: cost per MWp (DC)": [["PV modules: bifacial n-type TOPCon, ALMM List-I/II (Indian cells)", 2.1, "Supply"], ["HDPE floats / pontoons (fabricated near site)", 0.52, "Supply"], ["Anchoring & mooring system", 0.33, "Supply"], ["Inverters (string / central skids)", 0.15, "Supply"], ["DC cables & floating AC cables", 0.24, "Supply"], ["Inverter-duty transformers & 33 kV ring main units", 0.18, "Supply"], ["Plant-level monitoring hardware", 0.02, "Supply"], ["Engineering & design (incl. bathymetry-based layout)", 0.06, "Install"], ["Float assembly, launching & installation (boats, slipway)", 0.28, "Install"], ["Shore works, cable landing, access jetty", 0.06, "Install"], ["Testing & commissioning", 0.06, "Install"]], "A2. Onshore wind: cost per MW": [["Wind turbine generator: nacelle, rotor, blades (made in India)", 4.1, "Supply"], ["Tubular / hybrid steel-concrete tower (~140 m)", 0.95, "Supply"], ["33 kV collection cables & pooling share", 0.35, "Supply"], ["Transport & crane erection", 0.45, "Install"], ["Civil foundations", 0.55, "Install"], ["Roads, hardstands & site preparation (govt land)", 0.25, "Install"], ["Engineering, testing & commissioning", 0.15, "Install"]], "A3. Battery storage (LFP): cost per MWh": [["LFP battery containers: cells, racks, BMS", 0.62, "Supply"], ["Power conversion system (PCS), grid-forming", 0.12, "Supply"], ["Transformers & switchgear", 0.07, "Supply"], ["HVAC, fire detection & suppression", 0.03, "Supply"], ["Battery EMS & controls", 0.03, "Supply"], ["Civil works & installation", 0.08, "Install"], ["Testing & commissioning", 0.05, "Install"]], "A4. Pooling substation & evacuation: lump sum (NO new transmission line)": [["33/400 kV power transformers (2 × 200 MVA)", 45, "Supply"], ["400 kV GIS bays: pooling S/S + extension at existing Indira Sagar switchyard", 38, "Supply"], ["33 kV switchgear, protection, substation automation (IEC 61850)", 14, "Supply"], ["33 kV floating-to-shore & land cables", 18, "Supply"], ["Civil works, earthing, control building", 20, "Install"], ["Erection, testing & commissioning", 15, "Install"]], "A5. Smart layer: AI-EMS, SCADA, sensors, digital twin, lump sum": [["AI energy-management & forecasting platform (software, licences)", 8, "Supply"], ["SCADA + power plant controller (PPC)", 6, "Supply"], ["Sensors: pyranometers, met-masts/LiDAR, reservoir level & inflow gauges", 4, "Supply"], ["Control-centre hardware & digital twin", 3, "Supply"], ["Cybersecurity (IEC 62443) & redundant fibre communications", 3, "Supply"], ["Integration with NHDC hydro SCADA, testing & training", 6, "Install"]], "A6. Pre-development, surveys & clearances, lump sum": [["Bathymetry, geotechnical & reservoir-level studies", 3, "Install"], ["12-month wind measurement campaign (met-mast + LiDAR)", 2, "Install"], ["Detailed project report (DPR) & owner's engineer", 6, "Install"], ["Environmental & social impact assessment, clearances", 4, "Install"], ["Legal, land & water-record verification (MP Bhu-Abhilekh), PPA", 3, "Install"], ["Project management & financial-close costs", 7, "Install"]]}, "om": [["Floating solar O&M", 29.5, 0.385], ["Wind O&M", 6.5, 0.085], ["Battery O&M", 1.6, 0.021], ["Smart-layer O&M", 3.2, 0.042], ["Hydro-firming fee to NHDC", 21.5, 0.28], ["Insurance", 7.0, 0.091], ["Water-surface use charge", 3.2, 0.042], ["SPV administration & overheads", 3.2, 0.042], ["Carbon MRV, registry & exchange fees", 0.8, 0.01], ["Total O&M (Y3)", 76.7, 1]], "kpi": {"Floating solar PV (DC)": 390, "Onshore wind": 50.4, "Battery storage (power)": 50, "Battery storage (energy)": 100, "Existing hydro (firming)": 1520, "Project IRR (post-tax)": 0.1012, "Equity IRR": 0.1337, "Project NPV at WACC (₹ Cr)": 200.2963, "WACC": 0.0878, "Equity payback (years from construction start)": 8.8744, "Project payback (years from construction start)": 9.3231, "Minimum DSCR": 1.3316, "Average DSCR": 1.6142, "Levelised cost of energy, LCOE (₹/kWh) = break-even tariff": 4.6275, "Blended power tariff achieved, Year 3 (₹/kWh)": 4.8751, "Margin over break-even (₹/kWh)": 0.2477, "Equity multiple (cash returned ÷ equity invested)": 4.3453, "Average return on equity (avg. profit after tax ÷ equity)": 0.1169, "Revenue in Y0, the construction year (₹ Cr)": 58.6496, "Revenue in Y3, first full year (₹ Cr)": 385.9652, "EBITDA in Y3 (₹ Cr)": 309.2615, "Profit after tax in Y3 (₹ Cr)": 76.882, "Total profit after tax over 25 years (₹ Cr)": 2128.8374, "CO2 avoided per year, Year 3 (tonnes)": 508237.7928, "TOTAL REVENUE": 58.6496, "TOTAL OPERATING COST": 16.5212, "EBITDA (operating profit)": 42.1285, "Book depreciation (straight line)": 0, "Interest (on average balance) + refinancing fee": 31.3669, "TAX PAID": 0, "PROFIT AFTER TAX (current-tax basis)": 10.7615, "Debt service (interest + principal)": 31.3669, "Project free cash flow (post-tax, unlevered)": -989.329, "Equity cash flow": -303.7373, "Cumulative equity cash flow": -303.7373}, "fin": [["Floating solar PV", 1560], ["Onshore wind", 342.7], ["Battery storage", 100], ["Pooling substation & evacuation", 150], ["Smart layer (AI-EMS, SCADA, digital twin)", 30], ["Pre-development, surveys & clearances", 25], ["Contingency", 110.4], ["Lender upfront fee", 16.2], ["TOTAL PROJECT COST (gross)", 2334.3], ["Government grant: VGF for BESS", 0], ["DEBT (loan required)", 1634.0], ["   IREDA", 653.6], ["   PFC / REC", 571.9], ["   SBI green term loan / green bonds / ADB-WB co-lending", 408.5], ["EQUITY (own contribution)", 700.3], ["   Project sponsor (our SPV)", 518.2], ["   NHDC (government JV partner)", 182.1], ["TOTAL SOURCES (= gross project cost)", 2334.3], ["Check: sources − uses (should be 0)", 0]], "sens": [["Base case", 0.1012, 0.1337, 200.2963, 1.3316, 1.6142, 8.8744, 4.6275], ["Tariff −10%", 0.0838, 0.0901, -60.007, 1.181, 1.4549, 12.3474, 4.6275], ["Tariff −20%", 0.0654, 0.0481, -323.6424, 1.0305, 1.3052, 18.5898, 4.6275], ["Capex +10%", 0.0878, 0.0995, -0.8886, 1.2071, 1.4978, 11.4317, 4.9704], ["Capex +20%", 0.0764, 0.0726, -204.0296, 1.1034, 1.4042, 14.8033, 5.3133], ["Generation −10%", 0.0842, 0.0911, -53.2856, 1.1826, 1.4614, 12.2386, 5.111], ["Interest rate +1%", 0.1012, 0.1246, 117.4365, 1.2455, 1.6105, 9.3665, 4.7523], ["Hydro-firming fee +50% (₹1.50/kWh shaped)", 0.0959, 0.1201, 120.6749, 1.2848, 1.5659, 9.576, 4.7775], ["No refinancing (8.75% for full tenor)", 0.1012, 0.1289, 200.2963, 1.3316, 1.5788, 9.1657, 4.6275], ["No carbon revenue at all", 0.0961, 0.1192, 125.3735, 1.2634, 1.5938, 10.0121, 4.6192], ["Carbon: conservative scenario", 0.0962, 0.1195, 126.9868, 1.2655, 1.5944, 9.978, 4.6228], ["Carbon: upside scenario", 0.1099, 0.1608, 324.9723, 1.2805, 1.6511, 7.5357, 4.6347], ["No wind (met-mast fails the gate)", 0.104, 0.1432, 207.2346, 1.372, 1.6216, 8.2444, 4.6053], ["VGF received for BESS", 0.1022, 0.1366, 215.0547, 1.3419, 1.6239, 8.7333, 4.6026], ["Combined downside: tariff −10%, capex +10%, generation −5%", 0.064, 0.0455, -379.9339, 1.0094, 1.3025, 19.1916, 5.2175], ["Tariff at which equity IRR = cost of equity (14%)", 4.8671, 0.014, null, null, null, null, null], ["Tariff at which minimum DSCR = 1.20x", 4.3804, -0.0874, null, null, null, null, null], ["Tariff at which project NPV = 0", 4.43, -0.0771, null, null, null, null, null], ["Tariff at which minimum DSCR = 1.00x (loan just serviceable)", 3.7427, -0.2203, null, null, null, null, null]], "feas": [["Test", "Our value", "Threshold", "Result"], ["Minimum DSCR", 1.332, 1.2, "PASS"], ["Average DSCR", 1.614, 1.3, "PASS"], ["Equity IRR vs. cost of equity", 0.134, 0.14, "FAIL"], ["Project IRR vs. WACC", 0.101, 0.088, "PASS"], ["Project NPV (₹ Cr)", 200.296, 0, "PASS"], ["LCOE vs. blended tariff (₹/kWh)", 4.627, 4.875, "PASS"], ["Equity payback (years)", 8.874, 10, "PASS"], ["FDRE tariff vs. lowest discovered FDRE tariff (₹/kWh)", 4.8, 4.82, "PASS"], ["Revenue in construction year Y0 (₹ Cr)", 58.65, 0, "PASS"], ["Battery a competitor would need for the same firmness (MWh)", 1200, null, null], ["Option 1: BUY firmness: capex of that battery", 1200, null, null], ["Option 2: RENT firmness: present value of 25 years of hydro-firming fees", 202.876, null, null], ["SAVING from hydro-firming (₹ Cr)", 997.124, null, null], ["Floating solar cost, 2022-24 (₹ Cr/MWac)", 7.18, 5.2, null], ["Floating solar tariff, Omkareshwar (₹/kWh)", 3.21, 4.8, null], ["FDRE tariff, lowest discovered (₹/kWh)", 4.82, 4.8, null], ["Round-the-clock RE tariff (₹/kWh)", 5.25, 4.8, null], ["4-hour assured-peak RE tariff (₹/kWh)", 5.99, 4.8, null], ["Standalone 2-hour BESS tariff (₹ lakh/MW/month)", 2.35, null, null], ["VGF for BESS (₹ lakh/MWh)", 18, 18, null], ["Carbon credit price, China CCER 2025 average (¥/t)", 70.76, null, null]], "carbon": [["Monitoring, reporting & verification (MRV) cost", 0.3, 0.3, 0.3], ["Registry, issuance & exchange fees", 0.03, 0.03, 0.03], ["One-time project design document (PDD), validation & registration", 0.5, 0.5, 0.5], ["Selected scenario (from Assumptions)", 2, null, null], ["  → Eligible energy", 2, null, null], ["  → Share of credits we can monetise", 0.5, null, null], ["  → Credit price, first year", 600, null, null], ["  → Price escalation", 0.03, null, null], ["  → Crediting period", 10, null, null], ["  → Monitoring, reporting & verification", 0.3, null, null], ["  → Registry, issuance & exchange fees", 0.03, null, null], ["  → One-time project design document", 0.5, null, null], ["Net clean energy delivered", 715.83, "GWh", null], ["CO2 avoided: full plant", 508237.79, "tCO2/yr", null], ["CO2 avoided: stored component only", 20384.1, "tCO2/yr", null], ["Credits monetised (selected scenario)", 254118.9, "CCC/yr", null], ["Carbon revenue (selected scenario)", 16.66, "₹ Cr/yr", null], ["Carbon revenue as share of total revenue", 0.04, "%", null], ["Carbon revenue over the crediting period", 152.5, "₹ Cr", null], ["Year-3 revenue if this scenario were chosen", 0.82, 16.66, 42.36]]};
+const M = DATA.model;
+const RM = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const inr = (v, d=0) => (v==null||isNaN(v)) ? "–" : Number(v).toLocaleString("en-IN",{minimumFractionDigits:d,maximumFractionDigits:d});
+const pct = (v, d=1) => (v*100).toFixed(d)+"%";
+const SVGNS = "http://www.w3.org/2000/svg";
+function S(tag, attrs={}, parent){const e=document.createElementNS(SVGNS,tag);for(const k in attrs){if(k==="text")e.textContent=attrs[k];else e.setAttribute(k,attrs[k]);}if(parent)parent.appendChild(e);return e;}
+function H(tag, attrs={}, html){const e=document.createElement(tag);for(const k in attrs){if(k==="class")e.className=attrs[k];else e.setAttribute(k,attrs[k]);}if(html!=null)e.innerHTML=html;return e;}
+const SRC={solar:"--solar",wind:"--wind",hydro:"--hydro",bess:"--bess",grid:"--grid",carbon:"--carbon",accent:"--olive",risk:"--risk",muted:"--muted-c"};
+const YRS=M.rv_tot.map((_,i)=>"Y"+i);
+const K=DATA.kpi, FIN=Object.fromEntries(DATA.fin), CAP=DATA.capex, SENS=DATA.sens;
+const kp=n=>K[Object.keys(K).find(k=>k.startsWith(n))];
+
+/* ============================== 3D PLANT MODEL ============================== */
+const P3=(function(){
+  const host=H("div",{id:"three"});
+  let ok=!!window.THREE, renderer, scene, camera, controls, clock, sun, hemi, amb, labels=[], flows=[], blades=[], rain, clouds=[], nightLights=[], water, active=false, mode="day", tween=null;
+  const RES=[[62,-38],[40,-52],[12,-56],[-22,-50],[-52,-64],[-88,-55],[-122,-72],[-168,-56],[-212,-28],[-190,-4],[-228,22],[-180,32],[-140,22],[-100,44],[-60,36],[-30,50],[4,38],[34,28],[62,22]];
+  const RIVER=[[60,-6],[90,-4],[118,0],[128,2],[164,2],[175,3],[260,6]];
+  const PADS=[[42,-75,15],[27,-88,15],[101,-45,20],[56,-104,12],[78,-8,11],[184,2,9],[18,-60,6]];
+  const MAJOR=["fpv","wind","hydro","grid"]; let focusKey="overview";
+  const FOCUS={overview:{p:[150,215,300],t:[10,0,-20]},fpv:{p:[-40,46,40],t:[-6,0,-22]},wind:{p:[-110,58,190],t:[-28,18,98]},bess:{p:[92,30,-30],t:[42,3,-80]},
+    hydro:{p:[128,44,46],t:[66,8,-8]},pool:{p:[-6,40,-160],t:[34,3,-86]},grid:{p:[180,70,0],t:[130,10,-90]},ctrl:{p:[14,26,-150],t:[56,5,-104]},osp:{p:[210,46,60],t:[160,6,2]}};
+  const MODES={
+    day:{name:"Dry-season noon",sky:0xcfe2ec,fog:0xdfe9ec,sunI:.95,amb:.12,solar:300,wind:8,bess:-50,hydro:150,note:"Solar carries the load. Hydro backs down, so the reservoir saves water. The battery charges."},
+    night:{name:"Evening peak, 7 pm",sky:0x1b2236,fog:0x1b2236,sunI:.12,amb:.18,solar:0,wind:22,bess:50,hydro:1200,note:"Solar is zero. The water saved at noon runs the turbines at full power; battery and wind top up."},
+    monsoon:{name:"Monsoon afternoon",sky:0x9aa5ad,fog:0xa9b2b8,sunI:.4,amb:.2,solar:110,wind:42,bess:0,hydro:1400,note:"Clouds cut solar. Heavy inflow and monsoon wind take over; the battery holds reserve."}};
+  function inPoly(x,z,poly){let c=false;for(let i=0,j=poly.length-1;i<poly.length;j=i++){const [xi,zi]=poly[i],[xj,zj]=poly[j];if(((zi>z)!==(zj>z))&&(x<(xj-xi)*(z-zi)/(zj-zi)+xi))c=!c;}return c;}
+  function dSeg(px,pz,a,b){const vx=b[0]-a[0],vz=b[1]-a[1],t=Math.max(0,Math.min(1,((px-a[0])*vx+(pz-a[1])*vz)/(vx*vx+vz*vz)));return Math.hypot(px-a[0]-t*vx,pz-a[1]-t*vz);}
+  const g=(x,z,cx,cz,s,h)=>h*Math.exp(-((x-cx)**2+(z-cz)**2)/(2*s*s));
+  function hAt(x,z){
+    for(const [px,pz,r] of PADS) if(Math.hypot(x-px,z-pz)<r) return 1.2;
+    if(inPoly(x,z,RES)) return -4;
+    for(let i=0;i<RIVER.length-1;i++) if(dSeg(x,z,RIVER[i],RIVER[i+1])<5.5) return -4;
+    if(Math.hypot((x-150)/1.6,z-2)<17) return -4;
+    let h=2.2+1.6*Math.sin(x*.035)*Math.cos(z*.03)+1.2*Math.sin(x*.07+1.3)*Math.sin(z*.06);
+    h+=g(x,z,-30,100,34,11)+g(x,z,-170,120,40,22)+g(x,z,-70,175,40,20)+g(x,z,70,140,32,16)+g(x,z,190,110,36,18)+g(x,z,-185,-130,44,20)+g(x,z,120,-175,36,12)+g(x,z,250,-40,30,14);
+    return Math.max(0.8,h);
+  }
+  function init(){
+    if(!ok) return;
+    try{renderer=new THREE.WebGLRenderer({antialias:true});}catch(e){ok=false;return;}
+    renderer.setPixelRatio(Math.min(2,devicePixelRatio));
+    renderer.shadowMap.enabled=true; renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+    host.appendChild(renderer.domElement);
+    scene=new THREE.Scene();
+    camera=new THREE.PerspectiveCamera(40,1,1,3000); camera.position.set(...FOCUS.overview.p);
+    controls=new THREE.OrbitControls(camera,renderer.domElement); controls.target.set(...FOCUS.overview.t);
+    controls.enableDamping=true; controls.maxPolarAngle=Math.PI*.46; controls.minDistance=18; controls.maxDistance=650;
+    renderer.domElement.addEventListener("pointerdown",()=>{tween=null;});
+    hemi=new THREE.HemisphereLight(0xfffaf0,0x6b7a55,.55); scene.add(hemi);
+    amb=new THREE.AmbientLight(0xffffff,.2); scene.add(amb);
+    sun=new THREE.DirectionalLight(0xfff3dd,1.2); sun.position.set(-160,240,120); sun.castShadow=true;
+    sun.shadow.mapSize.set(2048,2048); Object.assign(sun.shadow.camera,{left:-280,right:280,top:240,bottom:-240,near:10,far:700}); sun.shadow.bias=-0.0008;
+    scene.add(sun);
+    clock=new THREE.Clock();
+    build(); applyMode();
+    new ResizeObserver(resize).observe(host);
+    loop();
+  }
+  const LM=(c,o={})=>new THREE.MeshLambertMaterial({color:c,...o});
+  function mesh(geo,mat,x,y,z,parent=scene,cast=true){const m=new THREE.Mesh(geo,mat);m.position.set(x,y,z);m.castShadow=cast;m.receiveShadow=true;parent.add(m);return m;}
+  const box=(w,h,d,c,x,y,z,p)=>mesh(new THREE.BoxGeometry(w,h,d),LM(c),x,y,z,p);
+  function build(){
+    // terrain (low-poly, carved reservoir basin)
+    const tg=new THREE.PlaneGeometry(720,540,150,112); tg.rotateX(-Math.PI/2);
+    const pos=tg.attributes.position, cols=[]; const cLow=new THREE.Color(0x9db07f), cHigh=new THREE.Color(0xb7a77a), cBank=new THREE.Color(0xc9b98f), cPad=new THREE.Color(0xc8c4b7);
+    for(let i=0;i<pos.count;i++){const x=pos.getX(i),z=pos.getZ(i),h=hAt(x,z);pos.setY(i,h);
+      let c; if(h<0) c=cBank; else if(PADS.some(([px,pz,r])=>Math.hypot(x-px,z-pz)<r)) c=cPad; else c=cLow.clone().lerp(cHigh,Math.min(1,(h-1)/16));
+      cols.push(c.r,c.g,c.b);}
+    tg.setAttribute("color",new THREE.Float32BufferAttribute(cols,3)); tg.computeVertexNormals();
+    const terrain=new THREE.Mesh(tg,new THREE.MeshLambertMaterial({vertexColors:true,flatShading:true})); terrain.receiveShadow=true; scene.add(terrain);
+    water=new THREE.Mesh(new THREE.PlaneGeometry(720,540),new THREE.MeshPhongMaterial({color:0x3f86a6,shininess:110,specular:0xbcd8e6,transparent:true,opacity:.94}));
+    water.rotation.x=-Math.PI/2; water.position.y=0.15; water.receiveShadow=true; scene.add(water);
+    // dams + powerhouses
+    const conc=0xc9c5bb;
+    const dam=box(9,16,66,conc,64,6,-8);
+    for(let i=0;i<7;i++) box(9.6,2.6,3.2,0xa7a397,64,14.8,-34+i*8.6);
+    const ph=box(16,9,26,0xb4b9bd,77,4.5,-8); for(let i=0;i<4;i++) box(2,5,2,0x8a9196,82,11,-17+i*6);
+    box(6,11,40,conc,172,4.5,2); box(10,7,16,0xb4b9bd,183,3.5,2);
+    // floating PV
+    const panelG=new THREE.BoxGeometry(3.2,.16,1.9), panelM=new THREE.MeshPhongMaterial({color:0x1b3768,shininess:120,specular:0x9fb4d8});
+    const floatG=new THREE.BoxGeometry(3.6,.4,2.5), floatM=LM(0xe8eaea);
+    const walkG=new THREE.BoxGeometry(23,.3,0.9), walkM=LM(0xbfc3c4);
+    [[-30,-34],[-4,-36],[22,-34],[-30,-10],[-4,-12],[22,-10],[-56,-32],[-56,-8]].forEach(([cx,cz])=>{
+      const nx=6,nz=8,n=nx*nz,pm=new THREE.InstancedMesh(panelG,panelM,n),fm=new THREE.InstancedMesh(floatG,floatM,n),o=new THREE.Object3D();let k=0;
+      for(let i=0;i<nx;i++)for(let j=0;j<nz;j++){o.position.set(cx-9.25+i*3.7,.35,cz-9.6+j*2.75);o.rotation.set(0,0,0);o.updateMatrix();fm.setMatrixAt(k,o.matrix);
+        o.position.y=.8;o.rotation.set(-.2,0,0);o.updateMatrix();pm.setMatrixAt(k,o.matrix);k++;}
+      pm.castShadow=true;fm.receiveShadow=true;scene.add(fm);scene.add(pm);
+      mesh(walkG,walkM,cx,.35,cz+11.6,scene,false); mesh(new THREE.BoxGeometry(2.4,1.6,2.4),LM(0xdcdcd6),cx+12.6,1.1,cz);
+    });
+    // wind turbines
+    const tm=LM(0xf2f2ef);
+    [[-78,74],[-58,100],[-36,72],[-16,106],[4,80],[22,108],[-62,128],[-24,134]].forEach(([x,z])=>{
+      const y=hAt(x,z); const gg=new THREE.Group(); gg.position.set(x,y,z); scene.add(gg);
+      mesh(new THREE.CylinderGeometry(.5,1.1,34,12),tm,0,17,0,gg); mesh(new THREE.BoxGeometry(2.2,2,5),tm,0,34.5,.6,gg);
+      const hub=new THREE.Group(); hub.position.set(0,34.5,-2.2); gg.add(hub);
+      for(let b=0;b<3;b++){const piv=new THREE.Group();piv.rotation.z=b*2*Math.PI/3;mesh(new THREE.BoxGeometry(.9,15,.3),tm,0,7.6,0,piv);hub.add(piv);}
+      gg.rotation.y=.6; blades.push(hub);
+      const bl=new THREE.Mesh(new THREE.SphereGeometry(.45,8,6),new THREE.MeshBasicMaterial({color:0xff3b30})); bl.position.set(0,35.8,.6); gg.add(bl); nightLights.push(bl);
+    });
+    // battery yard
+    for(let i=0;i<8;i++) box(6,3,2.5,0xeceeee,33+(i%4)*6.6,2.7,-71-Math.floor(i/4)*5.2);
+    box(3.2,3,3.2,0x8f78c8,59,2.7,-71); box(3.2,3,3.2,0x8f78c8,59,2.7,-76);
+    // pooling substation
+    for(let i=0;i<2;i++) box(4.6,5,6.2,0x7f8a92,23+i*9,3.7,-88);
+    const steel=0xa5adb2; for(let i=0;i<4;i++){box(.5,10,.5,steel,17+i*6.6,6.2,-96);box(.5,10,.5,steel,17+i*6.6,6.2,-80);} box(21,.5,.5,steel,27,11,-96); box(21,.5,.5,steel,27,11,-80);
+    // existing switchyard
+    for(let i=0;i<5;i++){box(.6,12,.6,steel,89+i*6,7,-53);box(.6,12,.6,steel,89+i*6,7,-37);} box(26,.6,.6,steel,101,13,-53); box(26,.6,.6,steel,101,13,-37);
+    for(let i=0;i<3;i++) box(4,5,5,0x7f8a92,93+i*8,3.7,-45);
+    // control centre
+    box(16,6,10,0xe7e9ea,56,4.2,-104); box(16.4,1.6,10.4,0x36667c,56,7.6,-104);
+    const win=new THREE.Mesh(new THREE.BoxGeometry(14,1.2,10.6),new THREE.MeshBasicMaterial({color:0xffd27a})); win.position.set(56,4.6,-104); scene.add(win); nightLights.push(win);
+    const win2=new THREE.Mesh(new THREE.BoxGeometry(16.6,1,26.6),new THREE.MeshBasicMaterial({color:0xffd27a})); win2.position.set(77,6,-8); scene.add(win2); nightLights.push(win2);
+    // transmission line
+    const tl=[[101,-45],[126,-72],[151,-99],[176,-126],[201,-153],[226,-180]];
+    tl.forEach(([x,z])=>{const y=hAt(x,z);mesh(new THREE.CylinderGeometry(.35,1.6,22,4),LM(steel),x,y+11,z);box(9,.5,.5,steel,x,y+20.5,z).rotation.y=.8;});
+    const wm=new THREE.LineBasicMaterial({color:0x5d666c});
+    [-3,0,3].forEach(o=>scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(tl.map(([x,z])=>new THREE.Vector3(x+o*.7,hAt(x,z)+20.5,z+o*.7))),wm)));
+    scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([[-4,.6,-26],[10,.6,-46],[18,1.4,-60],[26,1.6,-82]].map(p=>new THREE.Vector3(...p))),new THREE.LineBasicMaterial({color:0x222222})));
+    // energy flows
+    const F=(key,pts,color)=>flows.push({key,curve:new THREE.CatmullRomCurve3(pts.map(p=>new THREE.Vector3(...p))),color,parts:[],inten:0,dir:1});
+    F("solar",[[-4,3,-26],[10,3,-46],[18,4,-60],[26,6,-84]],"--solar"); F("solar",[[22,3,-16],[22,3,-44],[18,4,-60]],"--solar"); F("solar",[[-30,3,-14],[-14,3,-40],[10,3,-46]],"--solar");
+    F("wind",[[-28,22,96],[0,16,50],[30,10,-20],[30,7,-84]],"--wind");
+    F("bess",[[44,6,-74],[33,7,-86]],"--bess");
+    F("pool",[[32,10,-88],[62,12,-72],[96,14,-46]],"--olive");
+    F("hydro",[[80,10,-8],[88,12,-30],[96,14,-45]],"--hydro"); F("hydro",[[183,7,2],[150,12,-32],[106,15,-46]],"--hydro");
+    F("grid",tl.map(([x,z])=>[x,hAt(x,z)+21,z]),"--grid");
+    const sg=new THREE.SphereGeometry(1.2,12,8);
+    flows.forEach(f=>{for(let i=0;i<16;i++){const m=new THREE.Mesh(sg,new THREE.MeshBasicMaterial({color:new THREE.Color(css(f.color))}));m.userData.o=i/16;m.visible=false;scene.add(m);f.parts.push(m);}});
+    // weather
+    const rg=new THREE.BufferGeometry(),rp=new Float32Array(2200*3);for(let i=0;i<2200;i++){rp[i*3]=(Math.random()-.5)*560;rp[i*3+1]=Math.random()*170;rp[i*3+2]=(Math.random()-.5)*440;}
+    rg.setAttribute("position",new THREE.BufferAttribute(rp,3)); rain=new THREE.Points(rg,new THREE.PointsMaterial({color:0xd5e0e8,size:1.2,transparent:true,opacity:.75})); rain.visible=false; scene.add(rain);
+    const cm=LM(0xb9c0c5,{transparent:true,opacity:.92});
+    for(let i=0;i<9;i++){const c=new THREE.Mesh(new THREE.SphereGeometry(28+Math.random()*18,10,8),cm);c.scale.y=.32;c.position.set(-240+i*60,105+Math.random()*20,-60+Math.random()*160);c.visible=false;scene.add(c);clouds.push(c);}
+    // labels
+    const L=(key,text,pos,c)=>{const el=H("div",{class:"lbl"},`<i style="background:var(${c})"></i>${text}`);el.addEventListener("click",()=>focus(key));host.appendChild(el);labels.push({key,el,v:new THREE.Vector3(...pos)});};
+    L("fpv","Floating solar · 390 MWp",[-4,9,-22],"--solar"); L("wind","Wind · 16 × 3.15 MW",[-28,56,100],"--wind"); L("bess","Battery · 50 MW / 100 MWh",[44,9,-76],"--bess");
+    L("hydro","Indira Sagar · 1,000 MW",[66,22,-8],"--hydro"); L("osp","Omkareshwar · 520 MW",[178,15,2],"--hydro"); L("pool","Pooling S/S 33/400 kV",[27,15,-88],"--olive");
+    L("grid","Existing 400 kV switchyard → grid",[101,19,-45],"--grid"); L("ctrl","AI-EMS control centre",[56,12,-104],"--olive");
+  }
+  function applyMode(){
+    if(!scene) return; const m=MODES[mode];
+    scene.background=new THREE.Color(m.sky); scene.fog=new THREE.Fog(m.fog,mode==="monsoon"?200:360,mode==="monsoon"?620:980);
+    sun.intensity=m.sunI; amb.intensity=m.amb; hemi.intensity=mode==="night"?.2:.42;
+    water.material.color.set(mode==="night"?0x1d3d55:mode==="monsoon"?0x587e8e:0x3f86a6);
+    rain.visible=mode==="monsoon"; clouds.forEach(c=>c.visible=mode==="monsoon"); nightLights.forEach(l=>l.visible=mode==="night");
+    const I={solar:m.solar/300,wind:m.wind/50,bess:Math.abs(m.bess)/50,hydro:Math.min(1,m.hydro/1400),pool:(m.solar+m.wind+Math.max(0,m.bess))/330,grid:1};
+    flows.forEach(f=>{f.inten=Math.min(1,I[f.key]||0);f.dir=(f.key==="bess"&&m.bess<0)?-1:1;});
+    readout();
+  }
+  function readout(){const r=host.querySelector(".readout");if(!r)return;const m=MODES[mode];
+    const rows=[["--solar","Floating solar",m.solar],["--wind","Wind",m.wind],["--bess",m.bess<0?"Battery (charging)":"Battery",m.bess],["--hydro","Hydro (NHDC)",m.hydro]];
+    r.innerHTML=`<h5>${m.name} · indicative MW</h5>`+rows.map(([c,n,v])=>`<div class="row"><i style="background:var(${c})"></i><span>${n}</span><b>${v>0?"+":""}${inr(v)}</b></div>`).join("")+`<div class="row tot"><i></i><span>Sent to grid</span><b>${inr(m.solar+m.wind+m.bess+m.hydro)}</b></div><p>${m.note}</p>`;}
+  function resize(){if(!renderer)return;const w=host.clientWidth,h=host.clientHeight;if(!w||!h)return;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();}
+  function focus(key){focusKey=key;const f=FOCUS[key]||FOCUS.overview;labels.forEach(l=>{l.el.classList.toggle("hot",l.key===key);l.el.classList.toggle("dim",key!=="overview"&&l.key!==key);});
+    if(!camera)return; if(RM){camera.position.set(...f.p);controls.target.set(...f.t);return;}
+    tween={t0:performance.now(),d:1400,p0:camera.position.clone(),q0:controls.target.clone(),p1:new THREE.Vector3(...f.p),q1:new THREE.Vector3(...f.t)};}
+  function loop(){requestAnimationFrame(loop);if(!active||!renderer)return;
+    const dt=Math.min(.05,clock.getDelta()),now=performance.now();
+    if(tween){const k=Math.min(1,(now-tween.t0)/tween.d),e=k<.5?4*k*k*k:1-Math.pow(-2*k+2,3)/2;camera.position.lerpVectors(tween.p0,tween.p1,e);controls.target.lerpVectors(tween.q0,tween.q1,e);if(k>=1)tween=null;}
+    controls.update();
+    const ws=MODES[mode].wind/50; blades.forEach(h=>h.rotation.z+=dt*(.5+ws*3.4)*(RM?.3:1));
+    const t=now/1000; flows.forEach(f=>{const n=Math.round(f.parts.length*f.inten);f.parts.forEach((p,i)=>{p.visible=i<n;if(!p.visible)return;let u=(t*.2*(RM?.3:1)+p.userData.o)%1;if(f.dir<0)u=1-u;p.position.copy(f.curve.getPointAt(u));});});
+    if(rain.visible){const a=rain.geometry.attributes.position;for(let i=0;i<a.count;i++){let y=a.getY(i)-dt*130;if(y<0)y=170;a.setY(i,y);}a.needsUpdate=true;clouds.forEach(c=>{c.position.x+=dt*4;if(c.position.x>300)c.position.x=-300;});}
+    renderer.render(scene,camera);
+    const w=host.clientWidth,h=host.clientHeight;
+    labels.forEach(l=>{const v=l.v.clone().project(camera);const vis=v.z<1&&Math.abs(v.x)<1.05&&Math.abs(v.y)<1.05&&(MAJOR.includes(l.key)||l.key===focusKey);l.el.style.display=vis?"flex":"none";if(vis){l.el.style.left=((v.x+1)/2*w)+"px";l.el.style.top=((1-v.y)/2*h-12)+"px";}});
+  }
+  function mount(container,opts={}){
+    if(!ok){container.appendChild(H("div",{class:"webglfail"},"The 3D model needs WebGL and an internet connection. Every other slide works without it."));return;}
+    if(!renderer)init(); if(!renderer){container.appendChild(H("div",{class:"webglfail"},"WebGL is not available in this browser."));return;}
+    container.appendChild(host);
+    let ro=host.querySelector(".readout"); if(opts.readout){if(!ro){ro=H("div",{class:"readout"});host.appendChild(ro);}readout();}else if(ro)ro.remove();
+    if(!host.querySelector(".hint3d"))host.appendChild(H("div",{class:"hint3d"},"Drag to rotate · scroll to zoom · click a label to fly there"));
+    active=true; requestAnimationFrame(resize);
+  }
+  return {mount,unmount(){active=false;},focus,setMode(m){mode=m;applyMode();},get mode(){return mode;},MODES};
+})();
+
+/* ============================== DRAGGABLE DIAGRAMS ============================== */
+function Diagram(spec){
+  const W=spec.w||1100,Hh=spec.h||520;
+  const svg=S("svg",{viewBox:`0 0 ${W} ${Hh}`,class:"dg",role:"img","aria-label":spec.label||"Diagram"});
+  const defs=S("defs",{},svg);
+  Object.entries(SRC).forEach(([k,v])=>{const m=S("marker",{id:"ar-"+k+spec.id,viewBox:"0 0 10 10",refX:"8",refY:"5",markerWidth:"6",markerHeight:"6",orient:"auto-start-reverse"},defs);S("path",{d:"M0,1 L9,5 L0,9 z",style:`fill:var(${v})`},m);});
+  const gE=S("g",{},svg),gN=S("g",{},svg),nodes={},edges=[];
+  spec.nodes.forEach(n=>{
+    const w=n.w||spec.nw||170,h=n.h||spec.nh||58,node={...n,w,h,x0:n.x,y0:n.y};
+    const g=S("g",{class:"node",tabindex:"0"},gN);
+    S("rect",{class:"halo",x:-3,y:-3,width:w+6,height:h+6,rx:17},g);
+    S("rect",{class:"card",width:w,height:h,rx:14},g);
+    S("circle",{cx:16,cy:19,r:5,style:`fill:var(${SRC[n.k||"accent"]})`},g);
+    S("text",{class:"t",x:28,y:23,text:n.t},g);
+    if(n.s)String(n.s).split("|").forEach((line,i)=>S("text",{class:"s",x:14,y:41+i*14,text:line},g));
+    node.g=g;nodes[n.id]=node;place(node);
+    let drag=null;
+    g.addEventListener("pointerdown",ev=>{const p=pt(ev);drag={dx:p.x-node.x,dy:p.y-node.y};g.setPointerCapture(ev.pointerId);ev.stopPropagation();});
+    g.addEventListener("pointermove",ev=>{if(!drag)return;const p=pt(ev);node.x=Math.max(0,Math.min(W-node.w,p.x-drag.dx));node.y=Math.max(0,Math.min(Hh-node.h,p.y-drag.dy));place(node);route();});
+    g.addEventListener("pointerup",()=>{drag=null;});
+  });
+  spec.edges.forEach(e=>{const k=e.k||"accent";const p=S("path",{class:"edge"+(e.c?"":" flow"),"marker-end":`url(#ar-muted${spec.id})`},gE);p.dataset.k=k;if(e.both)p.setAttribute("marker-start",`url(#ar-muted${spec.id})`);
+    const lab=e.l?S("text",{class:"elab",text:e.l},gE):null;edges.push({...e,p,lab,k});});
+  function pt(ev){return new DOMPoint(ev.clientX,ev.clientY).matrixTransform(svg.getScreenCTM().inverse());}
+  function place(n){n.g.setAttribute("transform",`translate(${n.x},${n.y})`);}
+  function anchor(a,b){const ax=a.x+a.w/2,ay=a.y+a.h/2,bx=b.x+b.w/2,by=b.y+b.h/2,dx=bx-ax,dy=by-ay;if(Math.abs(dx)*a.h>Math.abs(dy)*a.w)return{x:dx>0?a.x+a.w:a.x,y:ay,hz:1};return{x:ax,y:dy>0?a.y+a.h:a.y,hz:0};}
+  function route(){edges.forEach(e=>{const a=nodes[e.f],b=nodes[e.t],s=anchor(a,b),t=anchor(b,a),c=Math.max(30,Math.hypot(t.x-s.x,t.y-s.y)/3);
+    const c1=s.hz?{x:s.x+(t.x>s.x?c:-c),y:s.y}:{x:s.x,y:s.y+(t.y>s.y?c:-c)},c2=t.hz?{x:t.x+(s.x>t.x?c:-c),y:t.y}:{x:t.x,y:t.y+(s.y>t.y?c:-c)};
+    e.p.setAttribute("d",`M${s.x},${s.y} C${c1.x},${c1.y} ${c2.x},${c2.y} ${t.x},${t.y}`);if(e.lab){e.lab.setAttribute("x",(s.x+t.x)/2+4);e.lab.setAttribute("y",(s.y+t.y)/2-6);}});}
+  route();
+  function highlight(h){const on=!!(h&&((h.n&&h.n.length)||(h.e&&h.e.length)));svg.classList.toggle("focus",on);
+    Object.values(nodes).forEach(n=>n.g.classList.toggle("hot",!!(on&&h.n&&h.n.includes(n.id))));
+    edges.forEach(e=>{const hot=on&&((h.e&&h.e.includes(e.f+">"+e.t))||(h.n&&h.n.includes(e.f)&&h.n.includes(e.t)));e.p.classList.toggle("hot",!!hot);
+      e.p.style.stroke=hot?`var(${SRC[e.k]})`:"";e.p.setAttribute("marker-end",`url(#ar-${hot?e.k:"muted"}${spec.id})`);if(e.both)e.p.setAttribute("marker-start",`url(#ar-${hot?e.k:"muted"}${spec.id})`);});}
+  function reset(){Object.values(nodes).forEach(n=>{n.x=n.x0;n.y=n.y0;place(n);});route();}
+  return {svg,highlight,reset};
+}
+
+/* ============================== CHARTS ============================== */
+function axes(svg,x0,y0,x1,y1,min,max,ticks,fmt){for(let i=0;i<=ticks;i++){const v=min+(max-min)*i/ticks,y=y1-(y1-y0)*(v-min)/(max-min);S("line",{x1:x0,x2:x1,y1:y,y2:y,class:"axl",style:Math.abs(v)<1e-9?"stroke:var(--muted-c)":""},svg);S("text",{x:x0-8,y:y+4,"text-anchor":"end",class:"ax",text:fmt(v)},svg);}}
+function niceMax(v){const p=Math.pow(10,Math.floor(Math.log10(v))),n=v/p;return(n<=1?1:n<=2?2:n<=2.5?2.5:n<=5?5:10)*p;}
+function legend(svg,items,x,y){let cx=x;items.forEach(([c,t])=>{S("circle",{cx:cx+5,cy:y-4,r:5,style:`fill:var(${c})`},svg);S("text",{x:cx+14,y:y,class:"ax",style:"fill:var(--ink)",text:t},svg);cx+=28+t.length*6.4;});}
+function stackedCols(series,cats,opt={}){
+  const W=780,Hh=370,x0=64,y0=40,x1=W-14,y1=Hh-36;const svg=S("svg",{viewBox:`0 0 ${W} ${Hh}`,role:"img","aria-label":opt.label||"chart"});
+  const tot=cats.map((_,i)=>series.reduce((s,se)=>s+Math.max(0,se.v[i]),0)),mx=niceMax(Math.max(...tot)*1.05);
+  axes(svg,x0,y0,x1,y1,0,mx,4,v=>inr(v));const bw=(x1-x0)/cats.length,bars=[];
+  cats.forEach((c,i)=>{let acc=0;const g=S("g",{},svg);series.forEach(se=>{const v=Math.max(0,se.v[i]),h=(y1-y0)*v/mx;S("rect",{x:x0+i*bw+bw*.18,y:y1-acc-h,width:bw*.64,height:Math.max(0,h),rx:2,style:`fill:var(${se.c})`},g);acc+=h;});
+    if(cats.length<=14||i%2===0)S("text",{x:x0+i*bw+bw/2,y:y1+16,"text-anchor":"middle",class:"ax",text:c},svg);bars.push(g);});
+  legend(svg,series.map(s=>[s.c,s.n]),x0,16);if(opt.unit)S("text",{x:x0-8,y:y0-12,"text-anchor":"end",class:"ax",text:opt.unit},svg);
+  return{svg,bw,x0,y0,y1,hl:idx=>bars.forEach((b,i)=>b.style.opacity=(idx==null||idx.includes(i))?1:.25)};
+}
+function lines(series,cats,opt={}){
+  const W=780,Hh=370,x0=64,y0=40,x1=W-14,y1=Hh-36;const svg=S("svg",{viewBox:`0 0 ${W} ${Hh}`,role:"img","aria-label":opt.label||"chart"});
+  const all=series.flatMap(s=>s.v);let mn=Math.min(0,...all),mx=Math.max(...all);const step=niceMax((mx-mn)/4);mn=Math.floor(mn/step)*step;mx=Math.ceil(mx/step)*step;
+  axes(svg,x0,y0,x1,y1,mn,mx,Math.round((mx-mn)/step),v=>opt.fmt?opt.fmt(v):inr(v));const X=i=>x0+(x1-x0)*i/(cats.length-1),Y=v=>y1-(y1-y0)*(v-mn)/(mx-mn);
+  cats.forEach((c,i)=>{if(cats.length<=14||i%2===0)S("text",{x:X(i),y:y1+16,"text-anchor":"middle",class:"ax",text:c},svg);});
+  series.forEach(se=>{if(se.area)S("path",{d:se.v.map((v,i)=>(i?"L":"M")+X(i)+","+Y(v)).join("")+`L${X(se.v.length-1)},${Y(0)}L${X(0)},${Y(0)}Z`,style:`fill:var(${se.c});opacity:.12`},svg);
+    S("path",{d:se.v.map((v,i)=>(i?"L":"M")+X(i)+","+Y(v)).join(""),style:`fill:none;stroke:var(${se.c});stroke-width:${se.w||2.4};stroke-linejoin:round;${se.dash?"stroke-dasharray:5 5":""}`},svg);
+    if(se.dots)se.v.forEach((v,i)=>S("circle",{cx:X(i),cy:Y(v),r:2.8,style:`fill:var(${se.c})`},svg));});
+  legend(svg,series.map(s=>[s.c,s.n]),x0,16);if(opt.unit)S("text",{x:x0-8,y:y0-12,"text-anchor":"end",class:"ax",text:opt.unit},svg);
+  return{svg,X,Y,y0,y1};
+}
+function hbars(rows,opt={}){
+  const W=780,rh=opt.rh||32,top=opt.legend?34:14,Hh=top+rows.length*rh+(opt.ref!=null?26:10),x0=opt.x0||300,x1=W-80;const svg=S("svg",{viewBox:`0 0 ${W} ${Hh}`,role:"img","aria-label":opt.label||"chart"});
+  const mx=opt.max||niceMax(Math.max(...rows.map(r=>r.v.reduce((a,b)=>a+b,0))));const gs=[];
+  rows.forEach((r,i)=>{const y=top+i*rh,g=S("g",{},svg);S("text",{x:x0-10,y:y+rh*.62,"text-anchor":"end",class:"ttl",text:r.n},g);
+    S("rect",{x:x0,y:y+5,width:x1-x0,height:rh-12,rx:(rh-12)/2,style:"fill:var(--card)"},g);
+    let acc=0;r.v.forEach((v,j)=>{const w=(x1-x0)*Math.max(0,v)/mx;S("rect",{x:x0+acc,y:y+5,width:w,height:rh-12,rx:Math.min((rh-12)/2,w/2),style:`fill:var(${(r.c&&r.c[j])||opt.c[j]})`},g);acc+=w;});
+    S("text",{x:x0+acc+8,y:y+rh*.62,class:"ax",style:"fill:var(--ink)",text:opt.fmt?opt.fmt(r):inr(r.v.reduce((a,b)=>a+b,0),1)},g);gs.push(g);});
+  if(opt.ref!=null){const x=x0+(x1-x0)*opt.ref/mx;S("line",{x1:x,x2:x,y1:top-4,y2:Hh-18,style:"stroke:var(--risk);stroke-dasharray:4 4"},svg);S("text",{x:x+5,y:Hh-6,class:"ax",style:"fill:var(--risk)",text:opt.refLabel},svg);}
+  if(opt.legend)legend(svg,opt.legend,x0,16);
+  return{svg,hl:idx=>gs.forEach((b,i)=>b.style.opacity=(idx==null||idx.includes(i))?1:.3)};
+}
+function table(cols,rows){const t=H("table",{class:"tbl"});t.innerHTML=`<thead><tr>${cols.map(c=>`<th${c.num?' style="text-align:right"':""}>${c.h}</th>`).join("")}</tr></thead>`;
+  const tb=H("tbody");rows.forEach(r=>{const tr=H("tr");tr.innerHTML=r.map((v,i)=>`<td class="${cols[i].num?"num":""}">${v}</td>`).join("");tb.appendChild(tr);});t.appendChild(tb);
+  return{el:t,hl:idx=>[...tb.children].forEach((tr,i)=>{tr.classList.toggle("hot",idx!=null&&idx.includes(i));tr.classList.toggle("dim",idx!=null&&!idx.includes(i));})};}
+
+/* ============================== MP MAP ============================== */
+const SITES=[
+  {id:"isp",n:"Indira Sagar–Omkareshwar",dist:"Khandwa",lat:22.27,lon:76.35,sc:[5,5,3,3,5,5,4]},
+  {id:"tawa",n:"Tawa–Satpura",dist:"Betul / Narmadapuram",lat:22.4,lon:78.0,sc:[4,2,5,4,4,4,3]},
+  {id:"bargi",n:"Bargi",dist:"Jabalpur",lat:22.94,lon:79.92,sc:[3,3,4,2,4,5,4]},
+  {id:"gs",n:"Gandhi Sagar",dist:"Mandsaur / Neemuch",lat:24.7,lon:75.55,sc:[3,3,4,5,3,1,4]},
+  {id:"bs",n:"Bansagar–Rewa",dist:"Shahdol / Rewa",lat:24.19,lon:81.29,sc:[3,4,4,2,3,2,3]}];
+const OUT=[{n:"Sardar Sarovar · Gujarat-run",lat:21.83,lon:74.1},{n:"Pench · inter-state",lat:21.7,lon:79.25},{n:"Madhikheda · too small",lat:25.55,lon:77.9}];
+const CITIES=[["Indore",22.72,75.86],["Bhopal",23.26,77.41],["Jabalpur",23.18,79.95],["Gwalior",26.22,78.18]];
+const WEIGHTS=[.25,.15,.15,.15,.15,.10,.05];
+const CRIT=["Business","Firming","Evacuation","Complementarity","Land","Absorption","Hazard"];
+const wscore=s=>s.sc.reduce((a,v,i)=>a+v*WEIGHTS[i],0);
+function mpMap(tier){
+  const W=780,Hh=440,lo0=73.4,lo1=83,la0=21,la1=26.9,X=lo=>36+(W-72)*(lo-lo0)/(lo1-lo0),Y=la=>Hh-30-(Hh-62)*(la-la0)/(la1-la0);
+  const svg=S("svg",{viewBox:`0 0 ${W} ${Hh}`,role:"img","aria-label":"Candidate sites in Madhya Pradesh"});
+  for(let lo=74;lo<=82;lo+=2){S("line",{x1:X(lo),x2:X(lo),y1:Y(la0),y2:Y(la1),class:"axl",style:"stroke-dasharray:2 5"},svg);S("text",{x:X(lo),y:Hh-10,"text-anchor":"middle",class:"ax",text:lo+"°E"},svg);}
+  for(let la=22;la<=26;la+=2){S("line",{x1:X(lo0),x2:X(lo1),y1:Y(la),y2:Y(la),class:"axl",style:"stroke-dasharray:2 5"},svg);S("text",{x:X(lo0)+2,y:Y(la)-5,class:"ax",text:la+"°N"},svg);}
+  const riv=(pts,w,o)=>S("path",{d:pts.map((p,i)=>(i?"L":"M")+X(p[0])+","+Y(p[1])).join(""),style:`fill:none;stroke:var(--hydro);stroke-width:${w};opacity:${o};stroke-linecap:round;stroke-linejoin:round`},svg);
+  riv([[81.75,22.67],[80.9,22.9],[79.9,23.1],[78.9,22.95],[77.72,22.75],[76.9,22.4],[76.47,22.28],[76.15,22.24],[75.4,22.1],[74.9,22.03],[74.2,21.9]],3.2,.5);
+  riv([[75.55,24.7],[76.2,25.3],[77,26],[78.3,26.6]],2,.35);
+  S("text",{x:X(78.3),y:Y(22.62)+18,class:"ax",style:"fill:var(--hydro)",text:"Narmada"},svg);S("text",{x:X(76.6),y:Y(25.62),class:"ax",style:"fill:var(--hydro)",text:"Chambal"},svg);
+  CITIES.forEach(([n,la,lo])=>{S("rect",{x:X(lo)-3,y:Y(la)-3,width:6,height:6,rx:1,style:"fill:var(--muted)"},svg);S("text",{x:X(lo)+7,y:Y(la)-5,class:"ax",text:n},svg);});
+  OUT.forEach(o=>{S("path",{d:`M${X(o.lon)-5},${Y(o.lat)-5}l10,10m0,-10l-10,10`,style:"stroke:var(--risk);stroke-width:2"},svg);S("text",{x:X(o.lon)+9,y:Y(o.lat)+4,class:"ax",style:"fill:var(--risk)",text:o.n},svg);});
+  const vals=SITES.map(s=>tier==null?wscore(s):s.sc[tier]),best=Math.max(...vals);
+  SITES.forEach((s,i)=>{const v=vals[i],r=7+(tier==null?v:v)*3.4,b=v===best,cx=X(s.lon),cy=Y(s.lat);
+    if(b)S("circle",{cx,cy,r:r+7,style:"fill:none;stroke:var(--lime);stroke-width:5;opacity:.9"},svg);
+    S("circle",{cx,cy,r,style:`fill:var(${b?"--olive":"--muted-c"});opacity:${b?.92:.5}`},svg);
+    const LO={bs:[-r-6,4,"end"],isp:[r+4,28,"start"],tawa:[-12,-r-8,"start"]},o=LO[s.id]||[r+6,4,"start"];
+    S("text",{x:cx+o[0],y:cy+o[1],"text-anchor":o[2],class:"ttl",style:b?"font-weight:600":"",text:`${s.n} · ${tier==null?v.toFixed(2):v+"/5"}`},svg);});
+  S("text",{x:W-16,y:20,"text-anchor":"end",class:"ax",text:tier==null?"circle size = weighted score":"circle size = "+CRIT[tier]+" score, 1–5"},svg);
+  return svg;
+}
+
+/* ============================== HERO JOURNEY ============================== */
+function journey(){
+  const W=1000,Hh=430,svg=S("svg",{viewBox:`0 0 ${W} ${Hh}`,role:"img","aria-label":"How one unit of power earns"});
+  const d="M40,236 C170,236 220,150 330,150 S540,236 640,236 S830,170 960,166";
+  S("path",{d,style:"fill:none;stroke:var(--muted-c);stroke-width:2;stroke-dasharray:2 6;stroke-linecap:round"},svg);
+  S("line",{x1:480,x2:480,y1:66,y2:186,style:"stroke:var(--muted-c);stroke-dasharray:2 5"},svg);
+  const top=S("g",{},svg);S("rect",{x:300,y:40,width:360,height:30,rx:15,style:"fill:var(--paper);stroke:var(--line2)"},top);
+  S("text",{x:480,y:60,"text-anchor":"middle",class:"ttl",style:"font-weight:400",text:"NHDC JV · existing 400 kV switchyard · no new line"},top);
+  [[235,192],[540,214],[805,196]].forEach(([x,y])=>S("circle",{cx:x,cy:y,r:4.5,style:"fill:var(--olive)"},svg));
+  const N=[{x:120,y:236,num:"01",big:"390 MWp",t:"Sun on the water",d:["Floating panels on Indira","Sagar make daytime power."],ic:"sun"},
+    {x:330,y:150,num:"02",big:"1,520 MW",t:"Reservoir as battery",d:["Hydro backs off by day;","the dam saves the water."],ic:"drop"},
+    {x:640,y:236,num:"03",big:"₹4.80/kWh",t:"Firm power at peak",d:["Saved water runs the 6–10 pm","peak, sold as FDRE power."],ic:"bolt"},
+    {x:900,y:168,num:"04",big:"5.08 lakh t",t:"Carbon credits",d:["Each clean MWh earns","credits under India's CCTS."],ic:"leaf"}];
+  const groups=N.map((n,i)=>{const g=S("g",{},svg);
+    const ring=S("circle",{cx:n.x,cy:n.y,r:42,style:"fill:none;stroke:var(--lime);stroke-width:6;opacity:0"},g);
+    const c=S("circle",{cx:n.x,cy:n.y,r:32,style:"fill:var(--paper);stroke:var(--line2)"},g);
+    icon(g,n.ic,n.x,n.y);
+    const cx=Math.min(W-212,Math.max(8,n.x-104)),cy=n.y+50;
+    S("rect",{x:cx,y:cy,width:208,height:118,rx:16,style:"fill:var(--paper);stroke:var(--line2)"},g);
+    S("text",{x:cx+14,y:cy+26,class:"ax",text:n.num},g);
+    S("text",{x:cx+194,y:cy+27,"text-anchor":"end",style:"font:400 17px var(--sans);fill:var(--ink)",text:n.big},g);
+    S("text",{x:cx+14,y:cy+54,style:"font:500 15px var(--sans);fill:var(--ink)",text:n.t},g);
+    n.d.forEach((l,j)=>S("text",{x:cx+14,y:cy+78+j*18,style:"font:400 12.5px var(--sans);fill:var(--muted)",text:l},g));
+    return {g,ring,c};});
+  return {svg,hl:i=>groups.forEach((o,k)=>{const on=i==null||i===k;o.ring.style.opacity=(i===k)?.9:0;o.g.style.opacity=on?1:.4;o.c.style.fill=(i===k)?"var(--bar)":"var(--paper)";o.g.querySelectorAll(".ic").forEach(e=>e.style.stroke=(i===k)?"#fff":"var(--ink)");})};
+}
+function icon(g,type,x,y){const st="fill:none;stroke:var(--ink);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round";
+  if(type==="sun"){S("circle",{class:"ic",cx:x,cy:y,r:6,style:st},g);for(let k=0;k<8;k++){const a=k*Math.PI/4;S("line",{class:"ic",x1:x+Math.cos(a)*10,y1:y+Math.sin(a)*10,x2:x+Math.cos(a)*14,y2:y+Math.sin(a)*14,style:st},g);}}
+  if(type==="drop")S("path",{class:"ic",d:`M${x},${y-13} C${x+9},${y-2} ${x+10},${y+4} ${x+10},${y+5} A10,10 0 0 1 ${x-10},${y+5} C${x-10},${y+4} ${x-9},${y-2} ${x},${y-13}Z`,style:st},g);
+  if(type==="bolt")S("path",{class:"ic",d:`M${x+2},${y-14} L${x-8},${y+2} L${x},${y+2} L${x-2},${y+14} L${x+8},${y-2} L${x},${y-2} Z`,style:st},g);
+  if(type==="leaf"){S("path",{class:"ic",d:`M${x-11},${y+11} C${x-11},${y-6} ${x-2},${y-12} ${x+12},${y-12} C${x+12},${y+2} ${x+4},${y+11} ${x-11},${y+11} Z`,style:st},g);S("line",{class:"ic",x1:x-11,y1:y+11,x2:x+4,y2:y-4,style:st},g);}
+}
+
+/* ============================== DECK ============================== */
+const SECTIONS=[["site","Why this site","0","Why this site"],["arch","System architecture","1","Architecture"],["road","Implementation roadmap","2","Roadmap"],["policy","Policy alignment","3","Policy"],["fin","Financial planning","4","Finance"],["prac","Technical & practical","5","Practical"]];
+const DECK=[];const add=(sec,title,o)=>DECK.push({sec,title,...o});
+
+add("site","Firm green power from a reservoir.",{h1:true,chip:"Smart hybrid power plan · Madhya Pradesh",
+  sub:"Floating solar, wind and a small battery built onto NHDC's Indira Sagar–Omkareshwar reservoirs, with the existing 1,520 MW of hydro acting as the battery.",
+  built:["NHDC · 1,520 MW hydro","390 MWp floating solar","50.4 MW wind","50 MW / 100 MWh battery","AI energy management"],
+  v:{type:"journey",bare:1,title:"How one unit of power earns"},
+  why:"A judge should leave with one idea: the reservoir is the battery, so we sell firm power at the price of firm power with the cost of plain solar.",
+  steps:[["Sun on the water","390 MWp of floating panels on Indira Sagar's government water surface: no land bought, no one moved.",{i:0}],
+   ["The reservoir is the battery","While the sun shines, NHDC's hydro backs down and the reservoir keeps its water.",{i:1}],
+   ["Firm power at the peak","That saved water runs the 6–10 pm peak. We sell firm, dispatchable (FDRE) power at ₹4.80/kWh.",{i:2}],
+   ["Carbon credits on top","Every clean MWh is counted under India's Carbon Credit Trading Scheme.",{i:3}],
+   ["The numbers",`₹${inr(FIN["TOTAL PROJECT COST (gross)"])} Cr project · ₹${inr(kp("Revenue in Y0"),1)} Cr revenue in the construction year · equity IRR ${pct(kp("Equity IRR"))} · loan covered ${kp("Minimum DSCR").toFixed(2)}×.`,{i:null}]]});
+add("site","The problem: MP has sun, not firm power",{sub:"MP has plenty of daytime solar. What it lacks is clean power after sunset, and a home for monsoon surplus.",
+  v:{type:"daycurve",title:"A typical MP day (indicative shapes)"},why:"Plain solar is now cheap and abundant. The money is in firmness.",
+  steps:[["Evening peak","State demand peaks 6–10 pm, exactly when solar drops to zero."],
+   ["Winter peak","Farm pumping in the Rabi season pushes demand to ~17–18 GW in Dec–Jan."],
+   ["Monsoon surplus","Hydro and wind peak when demand is lowest, so plain plants get curtailed."],
+   ["The business gap","Plain floating solar sold at ₹3.21–3.89/kWh at Omkareshwar. Firm, dispatchable power sold at ₹4.82–6.28/kWh in 2026 auctions."]]});
+add("site","The six-tier strategy for choosing a site",{sub:"How China's hydro developers and India's project-finance teams actually pick a hybrid site, combined into one method.",
+  v:{type:"diagram",title:"Decision method · drag any box",spec:{id:"m",w:1120,h:440,nw:196,nodes:[
+   {id:"a",t:"All MP govt sites",s:"dams, reservoirs, wasteland",x:16,y:36,k:"grid"},
+   {id:"b",t:"Fatal-flaw screen",s:"kill before scoring",x:250,y:36,k:"risk"},
+   {id:"c",t:"Six weighted tiers",s:"business 25% + 6 tiers",x:484,y:36,k:"accent"},
+   {id:"d",t:"Sensitivity test",s:"change the weights;|does the winner hold?",x:718,y:36,h:62,k:"accent"},
+   {id:"e",t:"5 sites ranked",s:"Indira Sagar–Omkareshwar #1",x:910,y:210,w:196,k:"hydro"},
+   {id:"t1",t:"T1 Hydro anchor",s:"以水定风光",x:16,y:200,k:"hydro"},{id:"t2",t:"T2 Evacuation",s:"打捆外送 · line limit",x:16,y:280,k:"grid"},
+   {id:"t3",t:"T3 Complementarity",s:"sun vs water vs wind",x:16,y:360,k:"solar"},{id:"t4",t:"T4 Land & geometry",s:"Bhu-Abhilekh, water NOC",x:250,y:360,k:"wind"},
+   {id:"t5",t:"T5 Grid absorption",s:"消纳 · curtailment",x:484,y:360,k:"bess"},{id:"t6",t:"T6 Hazard & environment",s:"seismic, flood, ecology",x:718,y:360,k:"risk"}],
+   edges:[{f:"a",t:"b"},{f:"b",t:"c"},{f:"c",t:"d"},{f:"d",t:"e"},{f:"t1",t:"c",c:1,k:"hydro"},{f:"t2",t:"c",c:1,k:"grid"},{f:"t3",t:"c",c:1,k:"solar"},{f:"t4",t:"c",c:1,k:"wind"},{f:"t5",t:"c",c:1,k:"bess"},{f:"t6",t:"c",c:1,k:"risk"}]}},
+  why:"<b>Chinese rule:</b> the reservoir comes first and decides how much solar and wind to add. <b>Indian rule:</b> the schedule equals the slowest clearance.",
+  steps:[["Fatal-flaw screen","Sardar Sarovar (run from Gujarat), Pench (inter-state), Madhikheda (60 MW, too small) and any private land are out before scoring.",{n:["a","b"]}],
+   ["Six tiers","Hydro anchor, evacuation, complementarity, land, grid absorption, hazard. Each scored 1–5.",{n:["t1","t2","t3","t4","t5","t6","c"]}],
+   ["Business weight","Bankability counts 25%: who buys the power, payment security, and a proven precedent.",{n:["c"]}],
+   ["Robustness","We change the weights and check the winner holds. It does.",{n:["c","d","e"]}]]});
+const TIERS=[
+ ["Tier 1 · Hydro anchor","Is there a regulating reservoir with spare turbine headroom?",[
+  ["Chinese engineer","以水定风光 (“hydro decides wind and solar”): the reservoir is the battery. Run-of-river dams are rejected because they cannot store."],
+  ["Indian engineer","Indira Sagar is India's largest reservoir by storage (~12 billion m³) with 1,000 MW; Omkareshwar adds 520 MW and is regulated twice."],
+  ["Business","A large reservoir replaces ~1,200 MWh of batteries, saving about ₹1,000 Cr."]]],
+ ["Tier 2 · Evacuation","Can the power get out cheaply?",[
+  ["Chinese engineer","打捆外送 (bundled transmission): one line carries hydro, solar and wind together. The line, not the sunshine, caps the plant."],
+  ["Indian engineer","NHDC's 400 kV switchyard already exists. We add a pooling substation and one bay, with no new transmission line."],
+  ["Honest note","Tawa–Satpura scores higher here because retiring coal frees its lines. Our AI dispatch backs hydro down while solar runs, so we stay under the line limit."]]],
+ ["Tier 3 · Complementarity","Do the three sources cover each other's gaps?",[
+  ["Seasons","Solar peaks Oct–May; reservoir inflow peaks Jul–Sep; MP wind peaks May–Aug."],
+  ["Daily","Solar by day; hydro and battery at the evening peak; wind at night and in the monsoon."],
+  ["Honest note","Gandhi Sagar has better wind. Ours is moderate, so wind is small (50 MW) and built only after 12 months of wind measurement."]]],
+ ["Tier 4 · Land & geometry","Is there non-private land or water close together?",[
+  ["Indian engineer","The reservoir water surface is state property: floating solar needs a reservoir-use NOC, not land acquisition. No farmland, no resettlement."],
+  ["Chinese engineer","Use unused land and water (未利用地) and keep cable runs short to the switchyard."],
+  ["Precedent","RUMSL already leased Omkareshwar's water area from NHDC for ~600 MW of floating solar."]]],
+ ["Tier 5 · Grid absorption","Will the grid take the power, or curtail it?",[
+  ["Buyers nearby","Indore–Pithampur–Dewas, MP's largest industrial load, is ~100–130 km away."],
+  ["Saturation","The Malwa belt (Neemuch, Agar, Mandsaur) is already full of solar and wind, so adding more there raises curtailment."],
+  ["Peak value","The reservoir moves energy into the 6–10 pm peak, the most valuable hours."]]],
+ ["Tier 6 · Hazard & environment","What could physically go wrong?",[
+  ["Physical","Seismic zone II–III; the reservoir level swings ~15–20 m, handled by elastic mooring; flood levels known from decades of dam records."],
+  ["Ecological","Panels cover under 1% of the reservoir; river releases stay under NVDA rules; no forest diversion."],
+  ["In the model","5% contingency and 0.3% insurance."]]]];
+TIERS.forEach((t,i)=>add("site",t[0],{sub:t[1],v:{type:"map",tier:i+1,title:`Five finalists scored on ${CRIT[i+1].toLowerCase()}`},why:`<b>Winner on this tier:</b> ${SITES.filter(s=>s.sc[i+1]===Math.max(...SITES.map(z=>z.sc[i+1]))).map(s=>s.n).join(", ")}.`,steps:t[2]}));
+const RANK=SITES.map(s=>({...s,w:wscore(s)})).sort((a,b)=>b.w-a.w);
+const RANKWHY={isp:["India's largest reservoir, 1,520 MW hydro, existing 400 kV switchyard","NHDC JV partner, proven floating-solar precedent, Indore buyers, revenue from Day 0"],
+ tawa:["Huge 400 kV switchyard freeing up as coal retires; Satpura-range wind","Coal-to-clean story attracts ADB/World Bank transition finance; weak hydro needs pumped storage"],
+ bargi:["~100 MW hydro on the Narmada, right at the Jabalpur load centre","Lowest curtailment risk; ideal pilot; small scale and weak wind"],
+ gs:["Only true three-source site: best MP wind, top solar, Chambal storage","Malwa grid saturation and the cheetah-sanctuary eco-zone raise the risk premium"],
+ bs:["~435 MW hydro and the Rewa renewable corridor","Next to the Singrauli coal pocket, no large buyer nearby, weak wind"]};
+add("site","Five finalists, ranked",{sub:"Weighted score out of 5 across business and the six tiers.",v:{type:"rank",title:"Ranking"},why:"Change the weights and the order of 2–5 shifts, but #1 stays on top in every case we tested.",
+  steps:RANK.map((s,i)=>[`#${i+1} ${s.n} · ${s.w.toFixed(2)}`,`<b>Engineering:</b> ${RANKWHY[s.id][0]}. <b>Business:</b> ${RANKWHY[s.id][1]}.`,{i}])});
+add("site","Proving the land is non-private",{sub:"The ground-level check using MP's digital land records. Floating solar on the reservoir avoids most of it.",
+  v:{type:"diagram",title:"Land verification flow · drag any box",spec:{id:"l",w:1120,h:470,nw:204,nodes:[
+   {id:"a",t:"MP Bhu-Abhilekh",s:"mpbhulekh.gov.in",x:16,y:30,k:"grid"},{id:"b",t:"Khasra number",s:"plot ID of each parcel",x:260,y:30,k:"grid"},
+   {id:"c",t:"Khatauni / B-1",s:"owner: Shasakiya, NVDA,|WRD or NHDC = non-private",x:504,y:30,h:62,k:"accent"},
+   {id:"d",t:"Land class",s:"Banjar ✓  Charnoi ⚠|Van (forest) → FCA 1980",x:748,y:30,h:62,k:"risk"},
+   {id:"e",t:"Naksha + DGPS survey",s:"map matches the ground",x:748,y:200,k:"grid"},{id:"f",t:"RCMS check",s:"no pending disputes",x:504,y:200,k:"grid"},
+   {id:"g",t:"Reservoir water surface",s:"state property → NOC only|(RUMSL precedent)",x:16,y:250,w:230,h:62,k:"hydro"},
+   {id:"h",t:"Diversion + NOCs",s:"MP Land Revenue Code 1959|MPPCB, fisheries, CEIG",x:260,y:370,h:62,k:"carbon"},
+   {id:"i",t:"Clean site",s:"zero land purchase",x:748,y:370,k:"accent"}],
+   edges:[{f:"a",t:"b"},{f:"b",t:"c"},{f:"c",t:"d"},{f:"d",t:"e"},{f:"e",t:"f"},{f:"f",t:"h"},{f:"g",t:"h",k:"hydro"},{f:"h",t:"i"}]}},
+  why:"Only the shore parcels (pooling substation, cable landing, wind plateau) need land records. The 390 MWp of panels sit on state water.",
+  steps:[["Pull the record","Find each shore parcel on MP Bhu-Abhilekh by its Khasra number.",{n:["a","b"]}],
+   ["Read the owner","The Khatauni / B-1 owner column must say Shasakiya (government), NVDA, WRD or NHDC. A private name means avoid.",{n:["b","c"]}],
+   ["Check the land class","Banjar (wasteland) is easiest. Charnoi (pasture) is protected commons. Van (forest) needs FCA 1980 clearance.",{n:["c","d"]}],
+   ["Match the ground","The cadastral map (Naksha) is checked by DGPS survey, then RCMS for pending cases.",{n:["d","e","f"]}],
+   ["Water surface","One reservoir-use NOC from NHDC / WRD, the route RUMSL already used at Omkareshwar.",{n:["g","h","i"]}]]});
+
+/* --- 1 System architecture --- */
+add("arch","The integrated plant in 3D",{sub:"Click through each part, or drag to rotate and scroll to zoom at any time.",
+  v:{type:"3d",focus:["overview","fpv","wind","bess","hydro","pool","ctrl","grid"],title:"3D model · Indira Sagar–Omkareshwar"},
+  why:"Everything new sits on the reservoir or on already-cleared shore pads next to NHDC's switchyard.",
+  steps:[["Co-location","Reservoir, two dams, floating solar near the dam, wind on the bank plateau, battery and pooling substation on the shore."],
+   ["Floating solar · 390 MWp","Bifacial panels on HDPE floats, moored for a 15–20 m level swing. Water cooling adds ~3% yield; panels cut evaporation."],
+   ["Wind · 16 × 3.15 MW","Low-wind turbines (~140 m hub) on the plateau above the reservoir."],
+   ["Battery · 50 MW / 100 MWh","Grid-forming LFP containers that bridge seconds to minutes while hydro ramps."],
+   ["Hydro · 1,520 MW (existing)","Indira Sagar 1,000 MW + Omkareshwar 520 MW store energy as water."],
+   ["Pooling substation · 33/400 kV","Collects solar, wind and battery power; 2 × 200 MVA transformers for N-1 redundancy."],
+   ["AI control centre","Forecasts sun, wind, inflow and prices, then dispatches every unit every 15 minutes."],
+   ["Existing 400 kV switchyard","Sends everything to the MPPTCL grid on existing lines. No new transmission line."]]});
+add("arch","How the three work together",{sub:"Same plant, three moments. Watch which source carries the load.",
+  v:{type:"3d",modes:true,focus:["overview","overview","overview","overview"],title:"Operating modes"},
+  why:"Solar saves water, water firms solar, and wind fills nights and the monsoon: one firm output from three variable sources.",
+  steps:[["Dry-season noon","Solar runs at full output. Hydro backs down so the reservoir saves water. The battery charges.",{mode:"day"}],
+   ["Evening peak","Solar is zero. The water saved at noon runs the turbines at full power. Battery and wind top up.",{mode:"night"}],
+   ["Monsoon","Clouds cut solar. Heavy inflow and monsoon wind take over. The battery holds reserve.",{mode:"monsoon"}],
+   ["Synergy","Each source covers another's weak hours, so the plant delivers firm power around the year.",{mode:"day"}]]});
+add("arch","Harvest → convert → store → distribute",{sub:"The electrical chain from sunlight, wind and water to the buyer.",
+  v:{type:"diagram",title:"System block diagram · drag any box",spec:{id:"b",w:1160,h:500,nw:178,nodes:[
+   {id:"pv",t:"Floating PV",s:"390 MWp bifacial",x:16,y:30,k:"solar"},{id:"inv",t:"String inverters",s:"1500 V DC → AC",x:212,y:30,k:"solar"},
+   {id:"wt",t:"Wind turbines",s:"16 × 3.15 MW",x:16,y:140,k:"wind"},{id:"wc",t:"Turbine converters",s:"→ 33 kV",x:212,y:140,k:"wind"},
+   {id:"bs",t:"Battery (LFP)",s:"100 MWh",x:16,y:250,k:"bess"},{id:"pcs",t:"Grid-forming PCS",s:"50 MW",x:212,y:250,k:"bess"},
+   {id:"bus",t:"33 kV collection bus",s:"floating + land cables",x:408,y:140,k:"accent"},{id:"pool",t:"Pooling substation",s:"33/400 kV · 2×200 MVA",x:600,y:140,k:"accent"},
+   {id:"swy",t:"400 kV switchyard",s:"existing (NHDC)",x:792,y:140,k:"grid"},
+   {id:"isp",t:"Indira Sagar hydro",s:"8 × 125 MW",x:600,y:300,k:"hydro"},{id:"osp",t:"Omkareshwar hydro",s:"8 × 65 MW",x:792,y:300,k:"hydro"},
+   {id:"grid",t:"MPPTCL 400 kV grid",s:"Western Region",x:972,y:140,k:"grid"},{id:"fdre",t:"FDRE buyer",s:"MPPMCL via SECI/NHPC",x:972,y:30,k:"grid"},
+   {id:"ci",t:"Industry",s:"Indore · Pithampur",x:972,y:250,k:"grid"},
+   {id:"sen",t:"Sensors",s:"irradiance, LiDAR, inflow",x:212,y:410,k:"accent"},{id:"ems",t:"AI-EMS + SCADA",s:"15-min dispatch",x:408,y:410,k:"accent"}],
+   edges:[{f:"pv",t:"inv",k:"solar"},{f:"inv",t:"bus",k:"solar"},{f:"wt",t:"wc",k:"wind"},{f:"wc",t:"bus",k:"wind"},{f:"bs",t:"pcs",k:"bess",both:1},{f:"pcs",t:"bus",k:"bess",both:1},
+    {f:"bus",t:"pool"},{f:"pool",t:"swy"},{f:"isp",t:"swy",k:"hydro"},{f:"osp",t:"swy",k:"hydro"},{f:"swy",t:"grid",k:"grid"},{f:"grid",t:"fdre",k:"grid"},{f:"grid",t:"ci",k:"grid"},
+    {f:"sen",t:"ems",c:1},{f:"ems",t:"inv",c:1},{f:"ems",t:"pcs",c:1},{f:"ems",t:"isp",c:1},{f:"ems",t:"pool",c:1}]}},
+  why:"Short-term storage is the battery; long-term storage is water in the reservoir.",
+  steps:[["Harvest","Sun on 390 MWp of floating panels, wind on 16 turbines, falling water in 16 existing hydro units.",{n:["pv","wt","isp","osp"]}],
+   ["Convert","Inverters turn solar DC into AC; converters and transformers bring everything to 33 kV.",{n:["pv","inv","wt","wc","bus"]}],
+   ["Store","The 100 MWh battery for minutes; water held in the reservoir for hours and seasons.",{n:["bs","pcs","bus","isp"]}],
+   ["Distribute","Pooling substation → NHDC switchyard → MPPTCL grid → FDRE buyer and Indore industry.",{n:["bus","pool","swy","grid","fdre","ci","isp","osp"]}],
+   ["Control","Sensors feed the AI-EMS, which sends set-points to inverters, battery, substation and hydro units.",{n:["sen","ems","inv","pcs","isp","pool"],e:["sen>ems","ems>inv","ems>pcs","ems>isp","ems>pool"]}]]});
+add("arch","Smart control and optimisation",{sub:"A rolling 15-minute loop: measure, forecast, optimise, dispatch, learn.",
+  v:{type:"diagram",title:"AI energy-management loop · drag any box",spec:{id:"c",w:1160,h:500,nw:198,nodes:[
+   {id:"s1",t:"Sky cameras",s:"cloud motion, irradiance",x:16,y:20,k:"solar"},{id:"s2",t:"Wind LiDAR + mast",s:"speed, direction",x:16,y:110,k:"wind"},
+   {id:"s3",t:"Reservoir gauges",s:"level, inflow, IMD rain",x:16,y:200,k:"hydro"},{id:"s4",t:"Grid & market",s:"frequency, SLDC schedule,|IEX prices",x:16,y:290,h:62,k:"grid"},
+   {id:"dp",t:"Data platform",s:"+ digital twin",x:268,y:160,k:"accent"},
+   {id:"f1",t:"AI/ML forecasts",s:"solar 15-min · wind · inflow|load & price · day-ahead",x:508,y:160,h:62,k:"accent"},
+   {id:"opt",t:"Dispatch optimiser",s:"maximise revenue within:|line limit · reservoir rule curve|eco-flow · FDRE commitment",x:508,y:300,w:244,h:78,k:"accent"},
+   {id:"a1",t:"Inverter controller",s:"active / reactive power",x:880,y:30,k:"solar"},{id:"a2",t:"Hydro governors",s:"NHDC set-points",x:880,y:130,k:"hydro"},
+   {id:"a3",t:"Battery PCS",s:"charge / discharge",x:880,y:230,k:"bess"},{id:"a4",t:"Turbine controllers",s:"pitch, curtail",x:880,y:330,k:"wind"},
+   {id:"lb",t:"Load balancing",s:"FDRE vs industry share",x:268,y:410,k:"carbon"}],
+   edges:[{f:"s1",t:"dp",c:1},{f:"s2",t:"dp",c:1},{f:"s3",t:"dp",c:1},{f:"s4",t:"dp",c:1},{f:"dp",t:"f1"},{f:"f1",t:"opt"},{f:"opt",t:"a1"},{f:"opt",t:"a2"},{f:"opt",t:"a3"},{f:"opt",t:"a4"},{f:"opt",t:"lb"},{f:"a2",t:"dp",c:1,l:"feedback"}]}},
+  why:"The same engine runs NHDC's existing hydro from month 3, which is our Day-0 revenue.",
+  steps:[["Sense","Sky cameras, pyranometers, LiDAR, reservoir gauges, IMD rainfall, grid frequency and IEX prices stream in.",{n:["s1","s2","s3","s4","dp"]}],
+   ["Forecast","Machine-learning models predict solar from 15 minutes to a day ahead, plus wind, inflow, demand and price.",{n:["dp","f1"]}],
+   ["Optimise","Every 15 minutes, an optimiser picks the best plan within the line limit, reservoir rule curve, ecological flow and FDRE commitment.",{n:["f1","opt"]}],
+   ["Dispatch & balance","Set-points go to inverters, hydro governors, battery and turbines; energy is split between the FDRE buyer and industry.",{n:["opt","a1","a2","a3","a4","lb"]}],
+   ["Learn","Actual output feeds the digital twin and the forecasts retrain.",{n:["a2","dp","f1"],e:["a2>dp","dp>f1"]}]]});
+add("arch","Fail-safes and redundancy",{sub:"Every timescale has a backup, from milliseconds to seasons.",
+  v:{type:"diagram",title:"Defence in depth · drag any box",spec:{id:"f",w:1160,h:440,nw:204,nodes:[
+   {id:"t1",t:"0–200 ms",s:"grid-forming battery holds|voltage & frequency",x:16,y:40,h:62,k:"bess"},{id:"t2",t:"1–30 s",s:"battery + hydro governor|primary response",x:246,y:40,h:62,k:"bess"},
+   {id:"t3",t:"1–10 min",s:"hydro units ramp up|(cloud passes, wind drops)",x:476,y:40,h:62,k:"hydro"},{id:"t4",t:"Hours",s:"reservoir shifts energy|into the evening peak",x:706,y:40,h:62,k:"hydro"},
+   {id:"t5",t:"Days / seasons",s:"reservoir rule curve|+ grid imports",x:936,y:40,h:62,k:"grid"},
+   {id:"r1",t:"N-1 equipment",s:"2×200 MVA transformers,|double 400 kV circuits",x:16,y:250,h:62,k:"accent"},{id:"r2",t:"No single point",s:"60+ inverter blocks,|ring-main 33 kV",x:246,y:250,h:62,k:"accent"},
+   {id:"r3",t:"Redundant control",s:"dual SCADA servers,|fibre ring, IEC 62443",x:476,y:250,h:62,k:"accent"},{id:"r4",t:"Black-start",s:"hydro restarts the grid|without outside power",x:706,y:250,h:62,k:"hydro"},
+   {id:"r5",t:"Islanding",s:"local feeders (Punasa)|run as a microgrid",x:936,y:250,h:62,k:"carbon"}],
+   edges:[{f:"t1",t:"t2"},{f:"t2",t:"t3"},{f:"t3",t:"t4"},{f:"t4",t:"t5"},{f:"r1",t:"r2",c:1},{f:"r2",t:"r3",c:1},{f:"r3",t:"r4",c:1},{f:"r4",t:"r5",c:1}]}},
+  why:"Losing any single item (a transformer, a circuit, an inverter block or a server) does not stop supply.",
+  steps:[["Milliseconds","Grid-forming battery inverters hold voltage and frequency the instant a cloud or fault hits.",{n:["t1","t2"]}],
+   ["Minutes to seasons","Hydro ramps within minutes; the reservoir covers hours, and its rule curve covers seasons.",{n:["t3","t4","t5"]}],
+   ["Equipment (N-1)","Two transformers, double circuits and 60+ inverter blocks.",{n:["r1","r2"]}],
+   ["Control","Dual SCADA servers on a fibre ring with IEC 62443 cybersecurity.",{n:["r3"]}],
+   ["Black-start & islanding","If the grid collapses, hydro restarts it and local feeders run as an island.",{n:["r4","r5"]}]]});
+
+/* --- 2 Implementation roadmap --- */
+add("road","Step-by-step build plan",{sub:"Build the parts that earn first; keep options open on the uncertain ones.",
+  v:{type:"diagram",title:"Implementation sequence · drag any box",spec:{id:"i",w:1160,h:470,nw:208,nodes:[
+   {id:"p1",t:"1 · Site assessment",s:"bathymetry, geotech, irradiance,|12-month wind mast, land records",x:16,y:30,h:62,k:"grid"},
+   {id:"p2",t:"2 · Agreements",s:"NHDC JV + firming deal,|water NOC, FDRE bid",x:256,y:30,h:62,k:"accent"},
+   {id:"p3",t:"3 · Component selection",s:"ALMM modules, Indian floats,|grid-forming BESS, low-wind WTG",x:496,y:30,h:62,k:"solar"},
+   {id:"p4",t:"4 · Financial close",s:"IREDA-led consortium, 70:30",x:736,y:30,k:"carbon"},
+   {id:"q1",t:"5 · AI-EMS on hydro",s:"live month 3 → first revenue",x:16,y:220,k:"accent"},{id:"q2",t:"6 · Substation + 100 MW FPV",s:"energised month 9",x:256,y:220,k:"solar"},
+   {id:"q3",t:"7 · Battery, FPV blocks 3–6",s:"months 8–22",x:496,y:220,k:"bess"},{id:"q4",t:"8 · Wind (if gate passed)",s:"months 14–30",x:736,y:220,k:"wind"},
+   {id:"t1",t:"Testing at every stage",s:"factory tests → site tests → CEIG|inspection → SLDC/CEA grid tests|→ 72-hour trial → COD",x:256,y:370,w:360,h:78,k:"risk"},
+   {id:"op",t:"Operate & scale",s:"refinance Y5 · Phase 2|Tawa–Satpura",x:736,y:370,h:62,k:"carbon"}],
+   edges:[{f:"p1",t:"p2"},{f:"p2",t:"p3"},{f:"p3",t:"p4"},{f:"p4",t:"q1"},{f:"q1",t:"q2"},{f:"q2",t:"q3"},{f:"q3",t:"q4"},{f:"q2",t:"t1",c:1},{f:"q3",t:"t1",c:1},{f:"q4",t:"op"}]}},
+  why:"The AI-EMS goes in first because it earns on NHDC's existing hydro before any panel is installed.",
+  steps:[["Site assessment","Reservoir-bed bathymetry and geotech, irradiance logging, a 12-month wind mast, land-record checks.",{n:["p1"]}],
+   ["Agreements","JV and firming agreement with NHDC, water-surface NOC, FDRE bid or PPA.",{n:["p2"]}],
+   ["Component selection","ALMM-listed bifacial modules, Indian HDPE floats, grid-forming LFP battery, low-wind-class turbines.",{n:["p3","p4"]}],
+   ["Integration sequence","AI-EMS → pooling substation and floating solar in 50 MW blocks → battery → wind.",{n:["q1","q2","q3","q4"]}],
+   ["Testing phases","Factory and site acceptance tests, CEIG inspection, SLDC/CEA grid-compliance tests and a 72-hour trial before each block's COD.",{n:["t1"]}],
+   ["Operate & scale","Refinance in year 5, then repeat at Tawa–Satpura.",{n:["op"]}]]});
+add("road","Timeline and when the money starts",{sub:"Months from construction start. Diamonds mark revenue starts and decision gates.",v:{type:"gantt",title:"Implementation & revenue timeline"},
+  why:"Revenue begins at month 3 and grows with every block, so interest during construction is partly paid by the plant itself.",
+  steps:[["Pre-development (−12 to 0)","MoU with NHDC, surveys, wind mast, DPR, PPA, financial close.",{i:[0,1,2,3]}],
+   ["First revenue: month 3","AI-EMS goes live on NHDC's existing hydro.",{i:[4]}],
+   ["Solar revenue from month 9","The first 100 MW block is energised; each later block adds revenue as it connects.",{i:[5,6,7]}],
+   ["Battery and wind","Battery by month 18; wind only after the gate at month 2 confirms the resource.",{i:[8,9,10]}],
+   ["Full operation: month 30","All blocks live; refinancing in year 5.",{i:[11]}]]});
+
+/* --- 3 Policy --- */
+const POL_C=[["MoP FDRE Guidelines 2023","Bidding for firm & dispatchable RE with peak supply","Our main PPA product at ₹4.80/kWh"],
+ ["MNRE National Wind-Solar Hybrid Policy 2018","Co-located hybrids share land and transmission","Legal basis for solar + wind on one connection"],
+ ["Green Energy Open Access Rules 2022","Consumers ≥100 kW can buy green power directly","25% of energy sold to Indore/Pithampur industry"],
+ ["Electricity (Late Payment Surcharge) Rules 2022","Payment discipline and letters of credit","Lower lender risk; 45-day collections"],
+ ["MoP VGF scheme for BESS (Jun 2025)","₹18 lakh/MWh grant; MP allocated 1.5 GWh","Upside if our battery is bid under MPPMCL's tender"],
+ ["CERC Ancillary Services Regulations 2022","Paid reserve markets","Battery earns when not cycling"],
+ ["Carbon Credit Trading Scheme 2023 + BEE offset methodologies 2025","Credits for 'renewable energy with storage'","Carbon revenue (base ₹16.7 Cr/yr)"],
+ ["ALMM List-I/II + PLI for modules","Domestic modules and, from Jun 2026, cells","Module specification; Make in India"],
+ ["Energy Storage Obligation","Discoms must buy stored renewable energy","Demand for our firmed power"],
+ ["IREDA / PFC / REC green loans; sovereign green bonds","Cheaper long-tenor debt","70% debt at ~8.75%, refinanced at ~8.0%"]];
+const POL_M=[["NHDC (NHPC 51% : MP Govt 49%)","Owns both reservoirs and the 400 kV switchyard","JV partner (26%) and firming-service provider"],
+ ["RUMSL (Rewa Ultra Mega Solar Ltd)","Ran the Omkareshwar floating-solar tenders","Water-surface lease precedent; possible bid route"],
+ ["MPPMCL (state power buyer)","Buys firm power; runs VGF battery tenders (750 MW / 1,500 MWh)","Offtaker for firm power"],
+ ["MP Renewable Energy Policy (MPNRED)","Single-window facilitation, govt land on lease","Faster approvals for shore facilities"],
+ ["MP Land Revenue Code 1959 + MP Bhu-Abhilekh","Land records and diversion","Land verification and diversion of shore parcels"],
+ ["NVDA / Water Resources Dept","Reservoir operation, water allocation, eco-flow","Water-surface NOC; dispatch respects release rules"],
+ ["MPERC open-access regulations","Wheeling and charges for direct sale","Prices our industry sales"],
+ ["MPPCB","Consent to establish / operate","Environmental compliance"]];
+add("policy","Central government policies",{sub:"Every policy is tied to a number or a decision in our plan.",v:{type:"table",title:"Government of India",cols:[{h:"Policy"},{h:"What it gives"},{h:"How we use it"}],rows:POL_C},
+  why:"We don't depend on any subsidy in the base case. Policies give us the product, the buyers and cheaper money.",
+  steps:[["Sell firm power","The FDRE guidelines and the hybrid policy define our product and our connection.",{i:[0,1]}],
+   ["Reach buyers, get paid","Green open access lets factories buy from us; LPS Rules make discoms pay on time.",{i:[2,3]}],
+   ["Extra revenue streams","Ancillary-service markets and the carbon credit scheme add income.",{i:[5,6]}],
+   ["Cheaper capital","VGF (upside), green loans and green bonds.",{i:[4,9]}],
+   ["Supply chain and demand","ALMM makes us buy Indian; the storage obligation makes discoms buy firmed power.",{i:[7,8]}]]});
+add("policy","Madhya Pradesh policies, land and water norms",{sub:"State agencies we work with, and the rules for land and water.",v:{type:"table",title:"Government of Madhya Pradesh",cols:[{h:"Agency / rule"},{h:"Role"},{h:"How we use it"}],rows:POL_M},
+  why:"The state already did this once: RUMSL and NHDC put ~600 MW of floating solar on Omkareshwar.",
+  steps:[["Partners","NHDC is our JV partner; RUMSL already leased this water area for solar.",{i:[0,1]}],
+   ["Buyer","MPPMCL buys firm power and runs VGF-backed battery tenders.",{i:[2]}],
+   ["Land and water norms","MP Bhu-Abhilekh, the Land Revenue Code, and NVDA/WRD rules for the water surface and river releases.",{i:[4,5]}],
+   ["Approvals","MPNRED single window, MPERC open-access rules and MPPCB consents.",{i:[3,6,7]}]]});
+
+/* --- 4 Financial planning --- */
+add("fin","Capital cost: manufacturing vs installation",{sub:`Total ₹${inr(FIN["TOTAL PROJECT COST (gross)"],1)} Cr, built up item by item at 2026 Indian prices.`,v:{type:"capex",title:"Capital cost by component (₹ Cr)"},
+  why:"85% of the cost is manufactured equipment. Floating-solar modules alone are ₹2.10 Cr per MWp.",
+  steps:[["Floating solar · ₹1,560 Cr","₹4.00 Cr/MWp: modules ₹2.10, floats ₹0.52, mooring ₹0.33, inverters, cables and transformers; installation ₹0.46.",{i:[0]}],
+   ["Wind · ₹343 Cr","₹6.80 Cr/MW: turbine ₹4.10, tower ₹0.95, cables; foundations, cranes and roads ₹1.40.",{i:[1]}],
+   ["Battery · ₹100 Cr","₹1.00 Cr/MWh: LFP containers ₹0.62, grid-forming PCS ₹0.12, safety systems; installation ₹0.13.",{i:[2]}],
+   ["Grid, smart layer, surveys","Pooling substation ₹150 Cr (no new line), AI-EMS ₹30 Cr, surveys and clearances ₹25 Cr.",{i:[3,4,5]}],
+   ["Contingency and fees","5% contingency (₹110 Cr) and a 1% lender fee (₹16 Cr).",{i:[6,7]}]]});
+add("fin","Operating cost and cost optimisation",{sub:"Year-3 operating cost, and the levers that keep total cost low.",v:{type:"opex",title:"Operating cost, Year 3 (₹ Cr)"},
+  why:"The biggest saving isn't on this chart: hydro firming avoids ~₹1,000 Cr of batteries.",
+  steps:[["Total O&M","₹76.7 Cr in Year 3, about ₹1.07 per kWh delivered, escalating 4% a year.",{i:null}],
+   ["Floating-solar O&M","₹29.5 Cr: boats, divers, mooring checks and robotic cleaning.",{i:[0]}],
+   ["The firming fee","₹21.5 Cr to NHDC for shaping 30% of our energy through the reservoir at ₹1/kWh.",{i:[4]}],
+   ["Cost optimisation","Hydro instead of big batteries, the existing switchyard (₹150–300 Cr saved), zero land cost, local float fabrication, robotic cleaning, digital-twin maintenance, refinancing.",{i:null}]]});
+add("fin","Total cost, loan and equity",{sub:"70 : 30 debt to equity, led by IREDA, with NHDC as a 26% equity partner.",v:{type:"funding",title:"Sources and uses of funds (₹ Cr)"},
+  why:"A government JV partner and a proven local precedent lower the interest rate more than any technical trick.",
+  steps:[["Total project cost",`₹${inr(FIN["TOTAL PROJECT COST (gross)"],1)} Cr, with no grant assumed in the base case.`,{i:[0]}],
+   ["Loan required",`₹${inr(FIN["DEBT (loan required)"],1)} Cr: IREDA ₹${inr(FIN["   IREDA"])} Cr, PFC/REC ₹${inr(FIN["   PFC / REC"])} Cr, SBI green loan / green bonds / ADB ₹${inr(FIN["   SBI green term loan / green bonds / ADB-WB co-lending"])} Cr.`,{i:[1]}],
+   ["Equity",`₹${inr(FIN["EQUITY (own contribution)"],1)} Cr: our SPV ₹${inr(FIN["   Project sponsor (our SPV)"])} Cr (74%), NHDC ₹${inr(FIN["   NHDC (government JV partner)"])} Cr (26%).`,{i:[1]}],
+   ["Government schemes","VGF for the battery (₹18 Cr) is an upside, not counted in the base case.",{i:null}]]});
+add("fin","Financing structure and repayment",{sub:"Non-recourse project finance through an SPV, repaid from the plant's own cash.",v:{type:"repay",title:"Annual debt service and loan balance (₹ Cr)"},
+  why:`Minimum DSCR ${kp("Minimum DSCR").toFixed(2)}× against the 1.20× lenders require.`,
+  steps:[["Moratorium Y0–Y2","Interest only while blocks are built and start earning.",{i:[0,1,2]}],
+   ["18-year repayment from Y3","Equal principal instalments; a 6-month reserve account protects lenders.",{i:[3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]}],
+   ["Refinance in Y5","After two years of operation, reprice to ~8.0% through green bonds or an InvIT.",{i:[5]}],
+   ["Debt-free by Y20",`Average DSCR ${kp("Average DSCR").toFixed(2)}×.`,{i:null}]]});
+add("fin","Revenue from Day 1",{sub:"Five income streams, stacked. The first starts before construction finishes.",v:{type:"revenue",title:"Revenue by stream (₹ Cr)"},
+  why:"Day 0: software on existing hydro. Day 1 of each block: power sales. Every year: carbon and grid services on top.",
+  steps:[["Day 0: AI-EMS service",`₹${inr(M.rv_ems[0],1)} Cr in Y0. Our software optimises NHDC's existing hydro for a base fee plus 30% of the extra value.`,{i:[0]}],
+   ["First blocks earn at once",`Y0 total ₹${inr(M.rv_tot[0],1)} Cr; Y1 ₹${inr(M.rv_tot[1],1)} Cr.`,{i:[0,1]}],
+   ["Full operation (Y3)",`₹${inr(M.rv_tot[3],1)} Cr: FDRE ₹${inr(M.rv_ppa[3],1)} Cr, industry ₹${inr(M.rv_ci[3],1)} Cr, AI-EMS ₹${inr(M.rv_ems[3],1)} Cr, battery services ₹${inr(M.rv_anc[3],1)} Cr, carbon ₹${inr(M.rv_co2[3],1)} Cr.`,{i:[3]}],
+   ["Long-term","Fixed 25-year FDRE tariff; carbon for the first 10 years; industry contracts rise 1% a year.",{i:null}]]});
+add("fin","Handling carbon credits",{sub:"From a clean megawatt-hour to money in the bank, under India's Carbon Credit Trading Scheme.",
+  v:{type:"diagram",title:"Carbon credit flow · drag any box",spec:{id:"k",w:1160,h:500,nw:204,nodes:[
+   {id:"a",t:"Clean MWh metered",s:"SCADA meters · 716 GWh/yr",x:16,y:30,k:"solar"},{id:"b",t:"Project document",s:"BEE methodology:|renewable energy with storage",x:256,y:30,h:62,k:"carbon"},
+   {id:"c",t:"Validation",s:"accredited carbon|verification agency (ACVA)",x:496,y:30,h:62,k:"carbon"},{id:"d",t:"Registration",s:"BEE · Grid-India registry",x:736,y:30,k:"carbon"},
+   {id:"e",t:"Monitoring (MRV)",s:"ISO 14064-2 · grid factor|0.71 tCO2/MWh (CEA)",x:736,y:170,h:62,k:"carbon"},{id:"f",t:"Verification",s:"ISO 14064-3 by ACVA",x:496,y:170,k:"carbon"},
+   {id:"g",t:"Credits issued (CCC)",s:"1 CCC = 1 tCO2e|5.08 lakh t/yr avoided",x:256,y:170,h:62,k:"carbon"},
+   {id:"h",t:"Double-count check",s:"buyers' green claims →|50% can be sold",x:16,y:300,h:62,k:"risk"},
+   {id:"i",t:"Sale on exchange",s:"IEX / PXIL, CERC-regulated",x:256,y:330,k:"accent"},{id:"j",t:"Obligated industry",s:"cement, steel, aluminium,|refineries",x:496,y:330,h:62,k:"grid"},
+   {id:"m",t:"Revenue",s:"base ₹16.7 Cr/yr · 10 years",x:736,y:330,k:"carbon"},{id:"x",t:"Article 6.4 option",s:"stored part only →|international buyers",x:960,y:170,w:184,h:62,k:"bess"}],
+   edges:[{f:"a",t:"b",k:"carbon"},{f:"b",t:"c",k:"carbon"},{f:"c",t:"d",k:"carbon"},{f:"d",t:"e",k:"carbon"},{f:"e",t:"f",k:"carbon"},{f:"f",t:"g",k:"carbon"},{f:"g",t:"h",k:"risk",c:1},{f:"g",t:"i",k:"carbon"},{f:"i",t:"j",k:"carbon"},{f:"j",t:"m",k:"carbon"},{f:"e",t:"x",k:"bess",c:1}]}},
+  why:"China's lesson: credits go to technology that still needs support. India chose renewable energy with storage, which is exactly our plant.",
+  steps:[["Eligibility","India's CCTS offset mechanism approved a 'renewable energy with storage' methodology in 2025. Projects must start after 1 Jan 2025; ours starts FY2027-28.",{n:["a","b"]}],
+   ["Register","An accredited verifier validates the project document; BEE registers it on the Grid-India registry.",{n:["b","c","d"]}],
+   ["Measure & verify","Metered MWh × grid factor 0.71 tCO2/MWh ≈ 5.08 lakh tonnes avoided a year, verified to ISO 14064.",{n:["d","e","f","g"]}],
+   ["No double counting","Where buyers claim our power for their green targets, those tonnes are theirs. We assume only 50% can be sold.",{n:["g","h"]}],
+   ["Sell","Credits trade on IEX/PXIL to obligated industry: ~2.5 lakh credits × ₹600 ≈ ₹16.7 Cr a year.",{n:["g","i","j","m"]}],
+   ["International option","Under Article 6.4, India allows only the stored part of RE + storage to be sold abroad, so this is a small extra.",{n:["e","x"]}]]});
+add("fin","Carbon: India vs China, and our scenarios",{sub:"China credits only offshore wind and solar thermal; India chose RE + storage. We plan on the middle case.",v:{type:"carbon",title:"Year-3 carbon revenue by scenario (₹ Cr)"},
+  why:`Without any carbon revenue the equity IRR is ${pct(SENS.find(s=>s[0].startsWith("No carbon"))[2])} and the loan is still covered ${SENS.find(s=>s[0].startsWith("No carbon"))[4].toFixed(2)}×. Carbon is upside.`,
+  steps:[["China's CCER","Relaunched Jan 2024. Plain onshore solar and wind are excluded; offshore wind and solar thermal qualify. 2025 average ~¥71/t; adds 7–10% to offshore wind revenue.",{i:null}],
+   ["India's CCTS","Targets for heavy industry create buyers; the offset mechanism lets RE + storage projects sell credits. Analyst price range ₹400–900/t.",{i:null}],
+   ["Three scenarios","Conservative: stored part only, ₹400/t. Base: whole plant, 50% sellable, ₹600/t. Upside: 80% at ₹900/t.",{i:[0,1,2]}],
+   ["Our plan","We count the base case and treat the upside as a bonus.",{i:[1]}]]});
+add("fin","Cash flow, break-even and ROI",{sub:"Cumulative cash to investors and to the project over 25 years.",v:{type:"cashflow",title:"Cumulative cash flow (₹ Cr)"},
+  why:`Profit after tax: ₹${inr(kp("Profit after tax in Y3"),1)} Cr in Y3 and ₹${inr(kp("Total profit after tax"))} Cr over 25 years.`,
+  steps:[["Investment years","Y0–Y2: equity goes in while early revenue already covers part of the interest.",{i:"invest"}],
+   ["Break-even",`Investors get their money back ${kp("Equity payback").toFixed(1)} years after construction starts (whole project: ${kp("Project payback").toFixed(1)} years).`,{i:"pay"}],
+   ["Returns",`Project IRR ${pct(kp("Project IRR"))} · equity IRR ${pct(kp("Equity IRR"))} · NPV ₹${inr(kp("Project NPV"))} Cr at ${pct(kp("WACC"))} WACC · equity multiple ${kp("Equity multiple").toFixed(2)}×.`,{i:"all"}],
+   ["ROI",`Average return on equity ${pct(kp("Average return on equity"))} a year.`,{i:"all"}]]});
+add("fin","Cost feasibility",{sub:"The tests a lender and an investor run, and why hydro firming wins on cost.",v:{type:"feas",title:"Bankability tests and benchmarks"},
+  why:"Make-or-buy: a 1,200 MWh battery would cost ₹1,200 Cr; renting NHDC's reservoir costs ₹203 Cr in today's money.",
+  steps:[["Lender tests pass",`Minimum DSCR ${kp("Minimum DSCR").toFixed(2)}× (≥1.20), average ${kp("Average DSCR").toFixed(2)}× (≥1.30), positive NPV.`,{i:[0,1,4]}],
+   ["Break-even below price",`LCOE ₹${kp("Levelised cost").toFixed(2)}/kWh vs blended tariff ₹${kp("Blended power tariff").toFixed(2)}/kWh. Our ₹4.80 bid is below the lowest discovered ₹4.82.`,{i:[5,7]}],
+   ["One test is tight",`Equity IRR ${pct(kp("Equity IRR"))} vs the 14% hurdle. A ₹4.87/kWh tariff or dropping wind clears it.`,{i:[2]}],
+   ["Make or buy firmness","Hydro firming saves ~₹997 Cr against batteries.",{i:[9,10,11,12]}]]});
+add("fin","Stress tests",{sub:"Equity IRR when things go wrong. The red line is the 14% investor hurdle.",v:{type:"sens",title:"Equity IRR by scenario"},
+  why:"The loan stays serviceable down to a ₹3.74/kWh tariff (DSCR 1.0×). Lender comfort (1.20×) holds down to ₹4.38/kWh.",
+  steps:[["Upside cases","No wind, carbon upside or VGF all lift returns to the hurdle or above.",{i:[11,12,13]}],
+   ["Moderate shocks","Interest +1%, firming fee +50% or no carbon leave equity IRR near 12% with the loan covered.",{i:[6,7,8,9]}],
+   ["Severe shocks","A 10% tariff cut, cost overrun or weaker generation each push IRR to ~9–10%; DSCR stays ≥1.18×.",{i:[1,3,5]}],
+   ["Combined downside","All three together are the real risk; we hedge with a fixed 25-year tariff, EPC price caps and conservative yield.",{i:[14]}]]});
+
+/* --- 5 Technical & practical --- */
+add("prac","Site suitability and environmental impact",{sub:"What makes this site work, and what we protect.",
+  v:{type:"table",title:"Site and environment",cols:[{h:"Topic"},{h:"Our approach"}],rows:[
+   ["Sun","GHI ~5.5–5.8 kWh/m²/day; floating panels run cooler (+~3% yield)."],
+   ["Water surface","Panels cover under 1% of Indira Sagar's ~900 km² spread; elastic mooring handles 15–20 m level swings."],
+   ["Evaporation","Panels shade the water and cut evaporation under the arrays, leaving more water for irrigation and generation."],
+   ["Aquatic life","Open channels between arrays, coverage limits, fisheries monitoring with the state Fisheries Department."],
+   ["No land loss","No forest diversion, no farmland, no resettlement."],
+   ["River flow","Hydro dispatch keeps NVDA's ecological-flow and irrigation releases unchanged."],
+   ["End of life","Panels recycled under India's E-Waste Rules 2022; batteries returned to recyclers."]]},
+  why:"The environmental case is positive: less evaporation and no land taken.",
+  steps:[["Suitability","Strong sun, calm water, an existing switchyard and buyers 100 km away.",{i:[0,1]}],
+   ["Environmental gains","Less evaporation and no land taken.",{i:[2,4]}],
+   ["Safeguards","Aquatic-life protection, unchanged river releases and planned recycling.",{i:[3,5,6]}]]});
+add("prac","Safety, grid integration, scalability, smart features",{sub:"How the plant stays safe, connects to the grid and grows.",
+  v:{type:"table",title:"Practical considerations",cols:[{h:"Topic"},{h:"Our approach"}],rows:[
+   ["Safety","CEA Safety Regulations 2023; UL 9540A-tested battery with fire suppression and spacing; lightning protection and earthing on water; boat-only access with PPE."],
+   ["Grid integration","CEA connectivity standards: fault ride-through, reactive power, harmonics. Grid-forming battery; 15-minute SLDC scheduling."],
+   ["Off-grid capability","Black-start from hydro; local feeders can run as an island during a grid collapse."],
+   ["Scalability","Floating solar grows in 50 MW blocks; Phase 2 at Tawa–Satpura; repeatable at Bargi and Bansagar."],
+   ["Smart features","AI forecasting and dispatch, digital twin, drone thermography, robotic cleaning, automated carbon MRV from SCADA data."],
+   ["Cybersecurity","IEC 62443 zones, dual SCADA servers, CEA cybersecurity rules."]]},
+  why:"Every item maps to a cost line in the financial model, so none of it is free-floating.",
+  steps:[["Safety","Standards-based battery, electrical and water safety.",{i:[0]}],
+   ["Grid and off-grid","Meets CEA connectivity; can black-start and run as an island.",{i:[1,2]}],
+   ["Scale","Grows block by block and site by site.",{i:[3]}],
+   ["Smart and secure","AI dispatch, digital twin, drones, robots, automatic carbon accounting, all secured.",{i:[4,5]}]]});
+add("prac","What we need to start",{sub:"Four approvals unlock a plant that earns from its first quarter.",
+  kpis:[["Net energy, Y3",inr(M.net[3])+" GWh"],["CO₂ avoided","5.08 lakh t/yr"],["Break-even tariff","₹"+kp("Levelised cost").toFixed(2)+"/kWh"],["Equity payback",kp("Equity payback").toFixed(1)+" yrs"]],
+  v:{type:"3d",modes:true,focus:["overview"],title:"Narmada Hybrid"},why:"Phase 2 at Tawa–Satpura reuses the same playbook on a retiring coal site.",
+  steps:[["NHDC","A joint-venture MoU and the hydro-firming agreement.",{mode:"day"}],
+   ["Water surface","A reservoir-use NOC from NHDC / Water Resources Dept.",{mode:"day"}],
+   ["Buyer","An FDRE PPA via MPPMCL or SECI, plus industry open-access contracts.",{mode:"night"}],
+   ["Finance","An IREDA-led debt consortium and carbon-project registration with BEE.",{mode:"monsoon"}]]});
+
+/* ============================== VISUAL BUILDERS ============================== */
+let stageVis=null;
+function vbox(s,extra){const v=H("div",{class:"visual"+(s.v.bare?" bare":"")});if(s.v.title&&!s.v.bare){const h=H("div",{class:"vhead"},`<b>${s.v.title}</b>`);if(extra)h.appendChild(extra);v.appendChild(h);}
+  const b=H("div",{class:"vbody"});v.appendChild(b);stageVis=v;return {v,b};}
+const BUILD={
+  journey(s){const {b}=vbox(s);b.classList.add("center");const j=journey();b.appendChild(j.svg);return{step(i,st){j.hl(st?st.i:null);}};},
+  "3d"(s){const sp=H("div",{class:"sp"});const {b}=vbox(s,sp);b.style.overflow="hidden";
+    if(s.v.modes)Object.entries({day:"Day",night:"Evening peak",monsoon:"Monsoon"}).forEach(([k,lbl])=>{const t=H("button",{class:"tog",type:"button","aria-pressed":String(P3.mode===k)},lbl);t.dataset.mode=k;t.addEventListener("click",()=>{P3.setMode(k);sp.querySelectorAll("[data-mode]").forEach(c=>c.setAttribute("aria-pressed",String(c===t)));});sp.appendChild(t);});
+    const ov=H("button",{class:"tog",type:"button"},"Overview");ov.addEventListener("click",()=>P3.focus("overview"));sp.appendChild(ov);
+    P3.mount(b,{readout:!!s.v.modes});
+    return{step(i,st){if(s.v.focus)P3.focus(s.v.focus[Math.min(i,s.v.focus.length-1)]);if(st&&st.mode){P3.setMode(st.mode);sp.querySelectorAll("[data-mode]").forEach(c=>c.setAttribute("aria-pressed",String(c.dataset.mode===st.mode)));}}};},
+  diagram(s){const sp=H("div",{class:"sp"});const rb=H("button",{class:"tog",type:"button"},"Reset layout");sp.appendChild(rb);const {b}=vbox(s,sp);const d=Diagram(s.v.spec);b.appendChild(d.svg);rb.addEventListener("click",d.reset);return{step(i,st){d.highlight(st&&(st.n||st.e)?st:null);}};},
+  map(s){const {b}=vbox(s);b.classList.add("center");b.appendChild(mpMap(s.v.tier));return{step(){}};},
+  rank(s){const {b}=vbox(s);const g=H("div",{class:"rank"});const cards=RANK.map((x,i)=>{const c=H("div",{class:"rcard"},`<div class="top2"><span>#${i+1}</span><span class="score">${x.w.toFixed(2)}</span></div><h4>${x.n}</h4><div class="meter"><i style="width:${x.w/5*100}%"></i></div><p>${x.dist}</p><p><b>Engineering:</b> ${RANKWHY[x.id][0]}.</p><p><b>Business:</b> ${RANKWHY[x.id][1]}.</p>`);g.appendChild(c);return c;});
+    b.appendChild(g);
+    return{step(i,st){cards.forEach((c,k)=>{c.classList.toggle("hot",!!st&&st.i===k);c.classList.toggle("dim",!!st&&st.i!==k);});}};},
+  daycurve(s){const {v,b}=vbox(s);const hrs=[...Array(24).keys()],dem=[.62,.58,.56,.55,.56,.6,.68,.76,.8,.8,.79,.78,.77,.76,.76,.78,.82,.9,.98,1,.97,.9,.8,.7],sol=hrs.map(h=>h<6||h>18?0:Math.sin((h-6)/12*Math.PI)*.95);
+    const ch=lines([{n:"State demand (share of peak)",c:"--grid",v:dem,area:1},{n:"Solar output (share of capacity)",c:"--solar",v:sol,area:1},{n:"Gap our hydro + battery fill",c:"--hydro",v:dem.map((d,i)=>Math.max(0,d-sol[i]-.35)),dash:1}],hrs.map(h=>h+"h"),{fmt:v=>Math.round(v*100)+"%"});
+    b.appendChild(ch.svg);v.appendChild(H("div",{class:"vnote"},"Indicative shapes for illustration: state demand peaks after sunset."));return{step(){}};},
+  table(s){const {b}=vbox(s);const t=table(s.v.cols,s.v.rows);b.appendChild(t.el);return{step(i,st){t.hl(st&&st.i?st.i:null);}};},
+  capex(s){const {v,b}=vbox(s);const rows=CAP.filter(r=>r[1]!=null).map(r=>({n:r[0].replace(/ \(.*\)/,"").replace("Smart layer: AI-EMS, SCADA, sensors, digital twin","Smart layer (AI-EMS, SCADA)"),v:[r[5],r[6]]}));
+    const c=CAP.find(r=>r[0]==="Contingency"),f=CAP.find(r=>r[0].startsWith("Financing cost"));rows.push({n:"Contingency (5%)",v:[c[5],c[6]]});rows.push({n:"Lender upfront fee",v:[0,f[4]]});
+    const ch=hbars(rows,{c:["--solar","--grid"],x0:250,legend:[["--solar","Manufacturing / supply"],["--grid","Installation & services"]]});b.appendChild(ch.svg);
+    v.appendChild(H("div",{class:"vnote"},`Gross ₹${inr(FIN["TOTAL PROJECT COST (gross)"],1)} Cr · ₹${(FIN["TOTAL PROJECT COST (gross)"]/350.4).toFixed(2)} Cr per MW of new AC capacity · source: D4 financial model.`));return{step(i,st){ch.hl(st&&st.i?st.i:null);}};},
+  opex(s){const {v,b}=vbox(s);const rows=DATA.om.filter(r=>!r[0].startsWith("Total")).map(r=>({n:r[0],v:[r[1]]}));const ch=hbars(rows,{c:["--olive"],x0:270});b.appendChild(ch.svg);
+    v.appendChild(H("div",{class:"vnote"},"Year-3 prices; O&M rises 4% a year (CERC norm ~3.84%)."));return{step(i,st){ch.hl(st&&st.i?st.i:null);}};},
+  funding(s){const {v,b}=vbox(s);const uses=CAP.filter(r=>r[1]!=null),c=CAP.find(r=>r[0]==="Contingency"),f=CAP.find(r=>r[0].startsWith("Financing cost"));
+    const rows=[{n:"Uses of funds",v:[...uses.map(r=>r[4]),c[4],f[4]],c:["--solar","--wind","--bess","--grid","--olive","--muted-c","--risk","--hydro"]},
+      {n:"Sources of funds",v:[FIN["   IREDA"],FIN["   PFC / REC"],FIN["   SBI green term loan / green bonds / ADB-WB co-lending"],FIN["   Project sponsor (our SPV)"],FIN["   NHDC (government JV partner)"]],c:["--hydro","--olive","--grid","--carbon","--wind"]}];
+    const ch=hbars(rows,{c:[],x0:150,rh:76});b.appendChild(ch.svg);
+    const lg=table([{h:"Source"},{h:"₹ Cr",num:1},{h:"Share",num:1}],[["IREDA (debt)",inr(FIN["   IREDA"],1),"28%"],["PFC / REC (debt)",inr(FIN["   PFC / REC"],1),"24.5%"],["SBI green loan / green bonds / ADB (debt)",inr(FIN["   SBI green term loan / green bonds / ADB-WB co-lending"],1),"17.5%"],["Our SPV (equity, 74%)",inr(FIN["   Project sponsor (our SPV)"],1),"22.2%"],["NHDC (equity, 26%)",inr(FIN["   NHDC (government JV partner)"],1),"7.8%"]]);
+    b.appendChild(lg.el);return{step(i,st){ch.hl(st&&st.i?st.i:null);}};},
+  repay(s){const {v,b}=vbox(s);const n=21,cats=YRS.slice(0,n);const ch=stackedCols([{n:"Debt service (interest + principal)",c:"--grid",v:M.ds.slice(0,n)}],cats,{unit:"₹ Cr"});
+    const svg=ch.svg,mx=niceMax(Math.max(...M.d_close)*1.05),sc=v=>ch.y1-(ch.y1-ch.y0)*v/mx;
+    S("path",{d:M.d_close.slice(0,n).map((v,i)=>(i?"L":"M")+(ch.x0+i*ch.bw+ch.bw/2)+","+sc(v)).join(""),style:"fill:none;stroke:var(--olive);stroke-width:2.6"},svg);
+    S("text",{x:ch.x0+3*ch.bw+6,y:sc(M.d_close[3])-10,class:"ax",style:"fill:var(--olive)",text:`Loan outstanding (peak ₹${inr(Math.max(...M.d_close))} Cr, own scale)`},svg);
+    b.appendChild(svg);v.appendChild(H("div",{class:"vnote"},"DSCR by year: "+M.dscr.slice(3,n).map((d,i)=>typeof d==="number"?`Y${i+3} ${d.toFixed(2)}×`:"").filter(Boolean).filter((_,i)=>i%3===0).join(" · ")));
+    return{step(i,st){ch.hl(st&&st.i?st.i:null);}};},
+  revenue(s){const {b}=vbox(s);const ch=stackedCols([{n:"AI-EMS service",c:"--olive",v:M.rv_ems},{n:"FDRE PPA",c:"--solar",v:M.rv_ppa},{n:"Industry open access",c:"--wind",v:M.rv_ci},{n:"Battery services",c:"--bess",v:M.rv_anc},{n:"Carbon credits",c:"--carbon",v:M.rv_co2}],YRS,{unit:"₹ Cr"});
+    b.appendChild(ch.svg);return{step(i,st){ch.hl(st&&st.i?st.i:null);}};},
+  carbon(s){const {b}=vbox(s);const sc=DATA.carbon.find(r=>r[0].startsWith("Year-3 revenue if"));const ch=hbars([{n:"1 · Conservative · stored part, ₹400/t",v:[sc[1]]},{n:"2 · Base · 50% of plant, ₹600/t",v:[sc[2]]},{n:"3 · Upside · 80%, ₹900/t",v:[sc[3]]}],{c:["--carbon"],x0:300,fmt:r=>"₹"+inr(r.v[0],1)+" Cr"});
+    b.appendChild(ch.svg);const t=table([{h:""},{h:"China CCER"},{h:"India CCTS (our route)"}],[["Launched","Relaunched Jan 2024","Scheme 2023; offset methodologies 2025"],["Solar & wind eligible?","Only offshore wind & solar thermal","Renewable energy with storage; hydro & pumped storage"],["Price","2025 average ~¥71/t (~₹850)","Analyst range ₹400–900/t"],["Share of revenue","7–10% for offshore wind",`${pct(DATA.carbon.find(r=>r[0].startsWith("Carbon revenue as share"))[1])} in our base case`]]);
+    b.appendChild(t.el);return{step(i,st){ch.hl(st&&st.i?st.i:null);}};},
+  cashflow(s){const {b}=vbox(s);const ch=lines([{n:"Cumulative equity cash flow",c:"--carbon",v:M.ecf_cum,dots:1,area:1},{n:"Cumulative project cash flow",c:"--olive",v:M.fcf_cum}],YRS,{unit:"₹ Cr"});
+    const svg=ch.svg,pe=kp("Equity payback"),xp=ch.X(pe),mk=S("g",{},svg);S("line",{x1:xp,x2:xp,y1:ch.y0,y2:ch.y1,style:"stroke:var(--risk);stroke-dasharray:4 4"},mk);S("text",{x:xp+6,y:ch.y0+14,class:"ax",style:"fill:var(--risk)",text:`equity break-even ≈ year ${pe.toFixed(1)}`},mk);
+    const inv=S("rect",{x:ch.X(0),y:ch.y0,width:ch.X(2.5)-ch.X(0),height:ch.y1-ch.y0,style:"fill:var(--risk);opacity:0"},svg);b.appendChild(svg);
+    return{step(i,st){inv.style.opacity=st&&st.i==="invest"?.08:0;mk.style.opacity=st&&(st.i==="pay"||st.i==="all")?1:.35;}};},
+  feas(s){const {b}=vbox(s);const rows=DATA.feas.filter(r=>r[0]!=="Test").map(r=>{const ip=/IRR/.test(r[0]),dd=/DSCR/.test(r[0]);
+      return[r[0],ip?pct(r[1]):dd?r[1].toFixed(2)+"×":inr(r[1],2),r[2]==null?"":ip?pct(r[2]):dd?Number(r[2]).toFixed(2)+"×":inr(r[2],2),r[3]?`<span class="${r[3]==="PASS"?"pass":"fail"}">${r[3]}</span>`:""];});
+    const t=table([{h:"Test / benchmark"},{h:"Ours",num:1},{h:"Threshold / market",num:1},{h:"Result"}],rows);b.appendChild(t.el);return{step(i,st){t.hl(st&&st.i?st.i:null);}};},
+  sens(s){const {v,b}=vbox(s);const sc=SENS.filter(r=>r[3]!=null);const rows=sc.map(r=>({n:r[0].replace(/\s*\(.*\)/,"").replace("Combined downside: tariff −10%, capex +10%, generation −5%","Combined downside"),v:[Math.max(0,r[2])],c:[r[2]>=.14?"--carbon":r[2]>=.1?"--solar":"--risk"]}));
+    const ch=hbars(rows,{c:["--olive"],x0:280,rh:25,max:.2,ref:.14,refLabel:"14% hurdle",fmt:r=>pct(r.v[0])});b.appendChild(ch.svg);
+    const be=SENS.filter(r=>r[3]==null);v.appendChild(H("div",{class:"vnote"},"Break-even FDRE tariffs · "+be.map(r=>`${r[0].replace("Tariff at which ","")}: ₹${r[1].toFixed(2)}`).join(" · ")));
+    return{step(i,st){ch.hl(st&&st.i?st.i:null);}};},
+  gantt(s){const {v,b}=vbox(s);const rows=[["MoU + JV with NHDC",-12,-9,"olive"],["Surveys: bathymetry, geotech",-11,-6,"grid"],["Wind measurement (12 months)",-10,2,"wind"],["DPR, PPA, financial close",-8,0,"carbon"],
+      ["AI-EMS on existing hydro",0,3,"olive",3],["Pooling substation",0,12,"grid"],["FPV blocks 1–2 (100 MW)",2,9,"solar",9],["FPV blocks 3–6",10,22,"solar",22],["Battery storage",8,18,"bess",18],["Wind gate decision",2,2,"wind",2],["Wind construction",14,30,"wind",30],["Full commercial operation",30,30,"risk",30]];
+    const W=800,rh=27,Hh=44+rows.length*rh,x0=240,x1=W-20,m0=-12,m1=36,X=m=>x0+(x1-x0)*(m-m0)/(m1-m0),svg=S("svg",{viewBox:`0 0 ${W} ${Hh}`,role:"img","aria-label":"Gantt chart"});
+    for(let m=m0;m<=m1;m+=6){S("line",{x1:X(m),x2:X(m),y1:26,y2:Hh-6,class:"axl",style:m===0?"stroke:var(--muted-c)":"stroke-dasharray:2 5"},svg);S("text",{x:X(m),y:18,"text-anchor":"middle",class:"ax",text:(m>0?"+":"")+m+" mo"},svg);}
+    const gs=rows.map((r,i)=>{const y=32+i*rh,g=S("g",{},svg);S("text",{x:x0-10,y:y+15,"text-anchor":"end",class:"ttl",text:r[0]},g);
+      if(r[2]>r[1])S("rect",{x:X(r[1]),y:y+4,width:X(r[2])-X(r[1]),height:rh-11,rx:(rh-11)/2,style:`fill:var(--${r[3]})`},g);
+      if(r[4]!=null){const cx=X(r[4]),cy=y+rh/2-1;S("path",{d:`M${cx},${cy-8}l8,8l-8,8l-8,-8z`,style:"fill:var(--lime);stroke:var(--ink);stroke-width:1.2"},g);}return g;});
+    b.appendChild(svg);v.appendChild(H("div",{class:"vnote"},"◆ = revenue start or decision gate. Month 0 = construction start (FY2027-28)."));
+    return{step(i,st){gs.forEach((g,k)=>g.style.opacity=(st&&st.i&&!st.i.includes(k))?.28:1);}};}
+};
+
+/* ============================== NAVIGATION ============================== */
+let cur=0,step=0,vis=null;
+const stage=document.getElementById("stage"),gbody=document.getElementById("gbody");
+const secName=id=>SECTIONS.find(s=>s[0]===id)[1];
+function buildPills(){const p=document.getElementById("pills");SECTIONS.forEach(([id,name,n,short])=>{const b=H("button",{class:"pill",type:"button","data-sec":id,title:name},`${n==="0"?"":`<span class="n">${n}</span>`}${short}`);b.addEventListener("click",()=>go(DECK.findIndex(d=>d.sec===id),0));p.appendChild(b);});}
+function render(){
+  const s=DECK[cur];P3.unmount();
+  stage.innerHTML="";
+  const cr=H("div",{class:"chiprow"});cr.appendChild(H("span",{class:"chip-lime"},s.chip||(SECTIONS.find(x=>x[0]===s.sec)[2]==="0"?"Why this site":`${SECTIONS.find(x=>x[0]===s.sec)[2]} · ${secName(s.sec)}`)));
+  const inSec=DECK.filter(d=>d.sec===s.sec),pos=inSec.indexOf(s)+1;cr.appendChild(H("span",{class:"chip-o"},`${pos} of ${inSec.length} in this section`));stage.appendChild(cr);
+  stage.appendChild(H(s.h1?"h1":"h2",{},s.title));
+  if(s.sub)stage.appendChild(H("p",{class:"sub"},s.sub));
+  if(s.built){const bo=H("div",{class:"builton"},"<small>BUILT ON</small>");s.built.forEach(t=>bo.appendChild(H("span",{class:"chip-o"},t)));stage.appendChild(bo);}
+  if(s.kpis){const k=H("div",{class:"kpis"});s.kpis.forEach(([a,b])=>k.appendChild(H("div",{class:"kpi"},`<small>${a}</small><b>${b}</b>`)));stage.appendChild(k);k.style.marginBottom="12px";}
+  vis=BUILD[s.v.type](s);stage.appendChild(stageVis);
+  document.querySelectorAll(".pill").forEach(p=>p.setAttribute("aria-current",String(p.dataset.sec===s.sec)));
+  const ap=document.querySelector(".pill[aria-current='true']");if(ap)ap.scrollIntoView({block:"nearest",inline:"nearest"});
+  try{history.replaceState(null,"","#slide-"+(cur+1));}catch(e){}
+  update();
+}
+function update(){
+  const s=DECK[cur],st=s.steps[step];
+  document.getElementById("gsec").textContent=secName(s.sec);
+  document.getElementById("gcnt").textContent=`${cur+1} / ${DECK.length}`;
+  gbody.innerHTML="";
+  gbody.appendChild(H("h3",{},st[0]));
+  gbody.appendChild(H("div",{class:"box now"},st[1]));
+  gbody.appendChild(H("div",{class:"lab"},`Points on this slide · ${step+1} of ${s.steps.length}`));
+  const ul=H("ul",{class:"plist"});s.steps.forEach((p,i)=>{const li=H("li");const b=H("button",{type:"button",class:i<step?"past":i===step?"now":""},`<span class="n">${String(i+1).padStart(2,"0")}</span><span>${p[0]}</span>`);b.addEventListener("click",()=>{step=i;update();});li.appendChild(b);ul.appendChild(li);});gbody.appendChild(ul);
+  if(s.why)gbody.appendChild(H("div",{class:"why"},"<b>Why it matters:</b> "+s.why));
+  gbody.appendChild(H("div",{class:"why"},"<kbd>Enter</kbd> or <kbd>→</kbd> next · <kbd>←</kbd> back · <kbd>0</kbd>–<kbd>5</kbd> jump to a section · <kbd>G</kbd> hide guide"));
+  if(vis)vis.step(step,st[2]||null);
+  const d=document.getElementById("dashes");d.innerHTML="";const inSec=DECK.map((x,i)=>[x,i]).filter(([x])=>x.sec===s.sec);
+  inSec.forEach(([x,i])=>{const e=H("i",{class:i<cur?"done":i===cur?"on":""});e.title=x.title;d.appendChild(e);});
+  document.getElementById("back").disabled=cur===0&&step===0;
+  document.getElementById("next").textContent=(cur===DECK.length-1&&step===s.steps.length-1)?"Done":"Next ↵";
+}
+function go(i,st){cur=Math.max(0,Math.min(DECK.length-1,i));step=st==="last"?DECK[cur].steps.length-1:st;render();}
+function next(){if(step<DECK[cur].steps.length-1){step++;update();}else if(cur<DECK.length-1)go(cur+1,0);}
+function prev(){if(step>0){step--;update();}else if(cur>0)go(cur-1,"last");}
+function toggleGuide(){const g=document.getElementById("guide"),m=document.getElementById("main");g.hidden=!g.hidden;m.classList.toggle("noguide",g.hidden);}
+document.getElementById("next").addEventListener("click",next);
+document.getElementById("back").addEventListener("click",prev);
+document.getElementById("restart").addEventListener("click",()=>go(0,0));
+document.getElementById("gclose").addEventListener("click",toggleGuide);
+document.getElementById("guideToggle").addEventListener("click",toggleGuide);
+document.addEventListener("keydown",e=>{
+  if(e.target.closest&&e.target.closest("input,textarea,select"))return;
+  if(e.key==="Enter"||e.key==="ArrowRight"||e.key==="PageDown"||e.key===" "){e.preventDefault();next();}
+  else if(e.key==="ArrowLeft"||e.key==="PageUp"||e.key==="Backspace"){e.preventDefault();prev();}
+  else if(/^[0-5]$/.test(e.key)){go(DECK.findIndex(d=>d.sec===SECTIONS[+e.key][0]),0);}
+  else if(e.key==="g"||e.key==="G"){toggleGuide();}
+  else if(e.key==="Home"){go(0,0);}else if(e.key==="End"){go(DECK.length-1,0);}
+});
+buildPills();
+const mh=/^#slide-(\d+)$/.exec(location.hash);go(mh?Math.min(DECK.length,+mh[1])-1:0,0);
+window.addEventListener("hashchange",()=>{const h=/^#slide-(\d+)$/.exec(location.hash);if(h&&+h[1]-1!==cur)go(+h[1]-1,0);});
+</script>

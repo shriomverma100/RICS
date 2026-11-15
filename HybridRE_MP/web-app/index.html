@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Narmada Hybrid</title>
+<link rel="stylesheet" href="css/styles.css">
+<script type="importmap">
+{ "imports": { "three": "./vendor/three/build/three.module.js", "three/addons/": "./vendor/three/examples/jsm/" } }
+</script>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="brand"><i aria-hidden="true"></i><b>narmada hybrid</b></div>
+    <nav class="cats" id="cats" aria-label="Judging criteria"></nav>
+  </header>
+  <div class="subbar">
+    <nav class="subs" id="subs" aria-label="Sub-sections"></nav>
+    <span class="judged" id="judged"></span>
+  </div>
+  <main class="main">
+    <section class="story" id="story" aria-live="polite"></section>
+    <section class="visual" id="visual"></section>
+  </main>
+  <footer class="bottom">
+    <button class="btn" id="back" type="button">← Back</button>
+    <button class="btn next" id="next" type="button">Next line ↵</button>
+    <div class="dashes" id="dashes"></div>
+    <span class="hint"><kbd>Enter</kbd> next line · <kbd>←</kbd> back · <kbd>1</kbd>–<kbd>8</kbd> criterion · <kbd>N</kbd> notes · <kbd>F</kbd> full screen</span>
+    <button class="btn ghost" id="notesBtn" type="button">Speaker notes</button>
+  </footer>
+  <aside class="notes" id="notes" hidden><b>Say this</b><p id="notesText"></p></aside>
+</div>
+<script src="js/data.js"></script>
+<script type="module" src="js/app.js"></script>
+</body>
+</html>
